@@ -7,24 +7,15 @@
 
 import expect from '@kbn/expect';
 
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { postCaseResp, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
-  defaultUser,
-  postCaseReq,
-  postCaseResp,
-  postCommentUserReq,
-  getPostCaseRequest,
-} from '../../../../common/lib/mock';
-import {
-  deleteCasesByESQuery,
+  deleteAllCaseItems,
   createCase,
   resolveCase,
-  createComment,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromSavedObject,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   secOnly,
   obsOnly,
@@ -36,7 +27,6 @@ import {
   noKibanaPrivileges,
   obsSec,
 } from '../../../../common/lib/authentication/users';
-import { getUserInfo } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -46,45 +36,19 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('resolve_case', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
+      await deleteAllCaseItems(es);
     });
 
-    it('should resolve a case with no comments', async () => {
+    it('should resolve a case', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
       const resolvedCase = await resolveCase({
         supertest,
         caseId: postedCase.id,
-        includeComments: true,
       });
 
       const data = removeServerGeneratedPropertiesFromCase(resolvedCase.case);
       expect(data).to.eql(postCaseResp());
       expect(data.comments?.length).to.eql(0);
-    });
-
-    it('should resolve a case with comments', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
-      const resolvedCase = await resolveCase({
-        supertest,
-        caseId: postedCase.id,
-        includeComments: true,
-      });
-
-      const comment = removeServerGeneratedPropertiesFromSavedObject(
-        resolvedCase.case.comments![0] as AttributesTypeUser
-      );
-
-      expect(resolvedCase.case.comments?.length).to.eql(1);
-      expect(comment).to.eql({
-        type: postCommentUserReq.type,
-        comment: postCommentUserReq.comment,
-        created_by: defaultUser,
-        pushed_at: null,
-        pushed_by: null,
-        updated_by: null,
-        owner: 'securitySolutionFixture',
-      });
     });
 
     it('unhappy path - 404s when case is not there', async () => {
@@ -118,51 +82,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(resolvedCase.outcome).to.eql('exactMatch');
           expect(resolvedCase.alias_target_id).to.eql(undefined);
         }
-      });
-
-      it('should resolve a case with comments', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          {
-            user: secOnly,
-            space: 'space1',
-          }
-        );
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-          expectedHttpCode: 200,
-          auth: {
-            user: secOnly,
-            space: 'space1',
-          },
-        });
-
-        const resolvedCase = await resolveCase({
-          supertest: supertestWithoutAuth,
-          caseId: postedCase.id,
-          includeComments: true,
-          auth: { user: secOnly, space: 'space1' },
-        });
-
-        const comment = removeServerGeneratedPropertiesFromSavedObject(
-          resolvedCase.case.comments![0] as AttributesTypeUser
-        );
-
-        expect(resolvedCase.case.comments?.length).to.eql(1);
-        expect(comment).to.eql({
-          type: postCommentUserReq.type,
-          comment: postCommentUserReq.comment,
-          created_by: getUserInfo(secOnly),
-          pushed_at: null,
-          pushed_by: null,
-          updated_by: null,
-          owner: 'securitySolutionFixture',
-        });
       });
 
       it('should not resolve a case when the user does not have access to owner', async () => {

@@ -21,9 +21,10 @@ import {
   getSpaceUrlPrefix,
   updateComment,
   deleteAllComments,
-} from '../../../common/lib/utils';
+} from '../../../common/lib/api';
 import {
   superUser,
+  secOnlyCreateComment,
   secOnlyDelete,
   secOnlyNoDelete,
 } from '../../../common/lib/authentication/users';
@@ -306,7 +307,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             params: postCommentUserReq,
-            auth: { user: secOnlyNoDelete, space: 'space1' },
+            auth: { user: secOnlyCreateComment, space: 'space1' },
           });
 
           await deleteComment({

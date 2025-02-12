@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
@@ -28,7 +28,7 @@ import {
   Hashes,
   ParsedDllManifest,
 } from '../common';
-import { BundleRefModule } from './bundle_ref_module';
+import { BundleRemoteModule } from './bundle_remote_module';
 
 /**
  * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
@@ -38,20 +38,6 @@ import { BundleRefModule } from './bundle_ref_module';
  * across mulitple workers on machines with lots of cores.
  */
 const EXTRA_SCSS_WORK_UNITS = 100;
-
-const isBazelPackageCache = new Map<string, boolean>();
-function isBazelPackage(pkgJsonPath: string) {
-  const cached = isBazelPackageCache.get(pkgJsonPath);
-  if (typeof cached === 'boolean') {
-    return cached;
-  }
-
-  const path = parseFilePath(Fs.realpathSync(pkgJsonPath, 'utf-8'));
-  const match = !!path.matchDirs('bazel-out', /-fastbuild$/, 'bin', 'packages');
-  isBazelPackageCache.set(pkgJsonPath, match);
-
-  return match;
-}
 
 export class PopulateBundleCachePlugin {
   constructor(
@@ -100,19 +86,10 @@ export class PopulateBundleCachePlugin {
         for (const module of compilation.modules) {
           if (isNormalModule(module)) {
             moduleCount += 1;
-            let path = getModulePath(module);
-            let parsedPath = parseFilePath(path);
+            const path = getModulePath(module);
+            const parsedPath = parseFilePath(path);
 
-            const bazelOutIndex = parsedPath.dirs.indexOf('bazel-out');
-            if (bazelOutIndex >= 0) {
-              path = Path.resolve(
-                this.workerConfig.repoRoot,
-                ...parsedPath.dirs.slice(bazelOutIndex),
-                parsedPath.filename ?? ''
-              );
-              parsedPath = parseFilePath(path);
-            }
-
+            // TODO: Does this need to be updated to support @kbn/ packages?
             if (!parsedPath.dirs.includes('node_modules')) {
               addReferenced(path);
 
@@ -134,13 +111,12 @@ export class PopulateBundleCachePlugin {
               ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
               'package.json'
             );
-
-            addReferenced(isBazelPackage(pkgJsonPath) ? path : pkgJsonPath);
+            addReferenced(pkgJsonPath);
             continue;
           }
 
-          if (module instanceof BundleRefModule) {
-            bundleRefExportIds.push(module.ref.exportId);
+          if (module instanceof BundleRemoteModule) {
+            bundleRefExportIds.push(module.req.full);
             continue;
           }
 
@@ -166,7 +142,7 @@ export class PopulateBundleCachePlugin {
         const sortedDllRefKeys = Array.from(dllRefKeys).sort(ascending((p) => p));
 
         bundle.cache.set({
-          bundleRefExportIds: bundleRefExportIds.sort(ascending((p) => p)),
+          remoteBundleImportReqs: bundleRefExportIds.sort(ascending((p) => p)),
           optimizerCacheKey: workerConfig.optimizerCacheKey,
           cacheKey: bundle.createCacheKey(
             referencedPaths,

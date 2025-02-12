@@ -1,10 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import Path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { Package } from '@kbn/repo-packages';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 /**
  * These aliases are used to ensure the values for different flags are collected in a single set.
@@ -28,7 +34,7 @@ export type KibanaCliArg = string & {
  * Ensure that cli args are always specified as ["--flag=value", "--other-flag"] and not ["--flag", "value"]
  */
 function assertCliArg(arg: string): asserts arg is KibanaCliArg {
-  if (!arg.startsWith('--')) {
+  if (typeof arg !== 'string' || !arg.startsWith('--')) {
     throw new Error(
       `invalid CLI arg [${arg}], all args must start with "--" and values must be specified after an "=" in a single string per arg`
     );
@@ -148,4 +154,34 @@ export function getKibanaCliLoggers(rawFlags: string[]) {
   }
 
   return [];
+}
+
+/**
+ * Parse the list of Kibana CLI Arg flags and extract the loggers config so that they can be extended
+ * in a subsequent FTR config
+ */
+export function remapPluginPaths(args: KibanaCliArg[], kibanaInstallDir: string) {
+  return args.map((arg) => {
+    if (argName(arg) !== 'plugin-path') {
+      return arg;
+    }
+
+    const value = argToValue(arg);
+    if (typeof value !== 'string') {
+      return arg;
+    }
+
+    let pkg;
+    try {
+      pkg = Package.fromManifest(REPO_ROOT, Path.resolve(value, 'kibana.jsonc'));
+    } catch (error) {
+      throw createFailError(`Unable to load plugin at ${arg}: ${error.message}`);
+    }
+
+    const newPath = Path.resolve(kibanaInstallDir, 'node_modules', pkg.manifest.id);
+    const newArg = `--plugin-path=${newPath}`;
+
+    assertCliArg(newArg);
+    return newArg;
+  });
 }

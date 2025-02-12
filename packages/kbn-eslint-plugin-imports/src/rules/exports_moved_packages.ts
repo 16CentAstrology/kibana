@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Rule, AST } from 'eslint';
+import type { Rule, AST } from 'eslint';
 import * as T from '@babel/types';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 
 import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
 
 export interface MovedExportsRule {
-  fromPackage: string;
-  toPackage: string;
+  from: string;
+  to: string;
   exportNames: string[];
 }
 
@@ -71,7 +72,7 @@ function getBadImports(imported: Imported[], rules: MovedExportsRule[]): BadImpo
       node: i.node,
       id: i.id,
       name: i.name,
-      newPkg: match.toPackage,
+      newPkg: match.to,
     };
   });
 }
@@ -203,10 +204,10 @@ export const ExportsMovedPackagesRule: Rule.RuleModule = {
         items: {
           type: 'object',
           properties: {
-            fromPackage: {
+            from: {
               type: 'string',
             },
-            toPackage: {
+            to: {
               type: 'string',
             },
             exportNames: {
@@ -268,7 +269,7 @@ export const ExportsMovedPackagesRule: Rule.RuleModule = {
         return;
       }
 
-      const rulesForRightPackage = rules.filter((m) => m.fromPackage === req);
+      const rulesForRightPackage = rules.filter((m) => m.from === req);
       if (!rulesForRightPackage.length) {
         return;
       }

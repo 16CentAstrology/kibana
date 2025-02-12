@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
-import uuid from 'uuid';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CasesCommon } from './common';
 
@@ -16,6 +16,7 @@ export interface CreateCaseParams {
   tag?: string;
   severity?: CaseSeverity;
   owner?: string;
+  category?: string;
   assignees?: [];
 }
 
@@ -50,22 +51,27 @@ export function CasesCreateViewServiceProvider(
      * Doesn't do navigation. Only works if you are already inside a cases app page.
      */
     async createCase({
-      title = 'test-' + uuid.v4(),
-      description = 'desc' + uuid.v4(),
+      title = 'test-' + uuidv4(),
+      description = 'desc' + uuidv4(),
       tag = 'tagme',
       severity = CaseSeverity.LOW,
+      category,
       owner,
     }: CreateCaseParams) {
+      if (owner) {
+        await this.setSolution(owner);
+      }
+
       await this.setTitle(title);
       await this.setDescription(description);
       await this.setTags(tag);
 
-      if (severity !== CaseSeverity.LOW) {
-        await this.setSeverity(severity);
+      if (category) {
+        await this.setCategory(category);
       }
 
-      if (owner) {
-        await this.setSolution(owner);
+      if (severity !== CaseSeverity.LOW) {
+        await this.setSeverity(severity);
       }
 
       await this.submitCase();
@@ -85,8 +91,13 @@ export function CasesCreateViewServiceProvider(
       await comboBox.setCustom('caseTags', tag);
     },
 
+    async setCategory(category: string) {
+      await comboBox.setCustom('categories-list', category);
+    },
+
     async setSolution(owner: string) {
-      await testSubjects.click(`${owner}RadioButton`);
+      await testSubjects.click('caseOwnerSuperSelect');
+      await testSubjects.click(`${owner}OwnerOption`);
     },
 
     async setSeverity(severity: CaseSeverity) {
@@ -118,8 +129,12 @@ export function CasesCreateViewServiceProvider(
 
     async createCaseFromModal(params: CreateCaseParams) {
       await casesCommon.assertCaseModalVisible(true);
-      await testSubjects.click('cases-table-add-case-filter-bar');
-      await casesCommon.assertCaseModalVisible(false);
+
+      await retry.tryForTime(10000, async () => {
+        await testSubjects.click('cases-table-add-case-filter-bar');
+        await casesCommon.assertCaseModalVisible(false);
+      });
+
       await this.creteCaseFromFlyout(params);
     },
   };

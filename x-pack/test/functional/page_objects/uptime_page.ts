@@ -16,17 +16,12 @@ export class UptimePageObject extends FtrService {
   private readonly monitor = this.ctx.getService('uptime').monitor;
   private readonly navigation = this.ctx.getService('uptime').navigation;
   private readonly retry = this.ctx.getService('retry');
-  private readonly testSubjects = this.ctx.getService('testSubjects');
 
   public async goToRoot(refresh?: boolean) {
     await this.navigation.goToUptime();
     if (refresh) {
       await this.navigation.refreshApp();
     }
-  }
-
-  public async dismissTour() {
-    await this.testSubjects.click('syntheticsManagementTourDismiss');
   }
 
   public async setDateRange(start: string, end: string) {
@@ -44,10 +39,6 @@ export class UptimePageObject extends FtrService {
     monitorIdToCheck?: string
   ) {
     await this.navigation.goToUptime();
-    const hasTour = await this.testSubjects.exists('syntheticsManagementTourDismiss');
-    if (hasTour) {
-      await this.testSubjects.click('syntheticsManagementTourDismiss');
-    }
     await this.setDateRange(dateStart, dateEnd);
     if (monitorIdToCheck) {
       await this.commonService.monitorIdExists(monitorIdToCheck);
@@ -101,7 +92,7 @@ export class UptimePageObject extends FtrService {
 
   public async selectFilterItems(filters: Record<string, string[]>) {
     for (const key in filters) {
-      if (filters.hasOwnProperty(key)) {
+      if (Object.hasOwn(filters, key)) {
         const values = filters[key];
         for (let i = 0; i < values.length; i++) {
           await this.commonService.selectFilterItem(key, values[i]);

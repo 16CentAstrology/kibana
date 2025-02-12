@@ -1,10 +1,18 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": ["node", "jest"]
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/datemath",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/dev-utils",
+    "@kbn/elastic-agent-utils",
+    "@kbn/zod",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
 }

@@ -7,7 +7,7 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -17,10 +17,10 @@ import {
   getConfigurationOutput,
   deleteConfiguration,
   createConfiguration,
-  createConnector,
   getServiceNowConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/utils';
+  createConnector,
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add('default', connector.id, 'connector', 'actions');
 
       const postRes = await createConfiguration(
         supertest,

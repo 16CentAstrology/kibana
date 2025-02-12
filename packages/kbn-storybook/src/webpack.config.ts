@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { externals } from '@kbn/ui-shared-deps-src';
@@ -13,6 +14,7 @@ import webpack, { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
+import 'webpack-dev-server'; // Extends webpack configuration with `devServer` property
 
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 
@@ -69,13 +71,24 @@ function isDesiredPreset(preset: Preset) {
 // Extend the Storybook Webpack config with some customizations
 /* eslint-disable import/no-default-export */
 export default ({ config: storybookConfig }: { config: Configuration }) => {
-  const config = {
+  const config: Configuration = {
     devServer: {
-      stats,
+      devMiddleware: {
+        stats,
+      },
     },
     externals,
     module: {
+      // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary dependencies
+      noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
       rules: [
+        {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: 'javascript/auto',
+        },
         {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
@@ -85,7 +98,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         {
           test: /\.peggy$/,
           use: {
-            loader: '@kbn/peggy-loader',
+            loader: require.resolve('@kbn/peggy-loader'),
           },
         },
         {
@@ -98,7 +111,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                  config: require.resolve('@kbn/optimizer/postcss.config'),
                 },
               },
             },
@@ -111,28 +124,62 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
                     resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                   )};\n${content}`;
                 },
-                implementation: require('node-sass'),
+                implementation: require('sass-embedded'),
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                  quietDeps: true,
                 },
               },
             },
           ],
         },
+        {
+          test: /node_modules\/@?xstate5\/.*\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+              plugins: ['@babel/plugin-transform-logical-assignment-operators'],
+            },
+          },
+        },
+        {
+          test: /\.js$/,
+          include: /node_modules[\\\/]@dagrejs/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env'], // Doesn't work with @kbn/babel-preset/webpack_preset
+              plugins: ['@babel/plugin-proposal-class-properties'],
+            },
+          },
+        },
+        {
+          test: /node_modules[\/\\]@?xyflow[\/\\].*.js$/,
+          loaders: 'babel-loader',
+          options: {
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            plugins: ['@babel/plugin-transform-logical-assignment-operators'],
+          },
+        },
       ],
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
+      extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
+        vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
-      symlinks: false,
     },
     stats,
   };
+
+  // Override storybookConfig mainFields instead of merging with config
+  delete storybookConfig.resolve?.mainFields;
 
   const updatedModuleRules = [];
   // clone and modify the module.rules config provided by storybook so that the default babel plugins run after the typescript preset
@@ -151,9 +198,8 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
 
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
-        {
-          plugins: [...plugins, require.resolve('@kbn/babel-plugin-synthetic-packages')],
-        },
+        require.resolve('@kbn/babel-preset/common_preset'),
+        { plugins },
         ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
           const tsPreset = getTsPreset(preset);
           if (!tsPreset) {

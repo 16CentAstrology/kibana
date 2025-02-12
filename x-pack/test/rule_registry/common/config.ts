@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
+import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -55,6 +57,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles,
       servers,
       services,
@@ -83,6 +86,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
+          ...findTestPluginPaths([
+            path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
+          ]),
           '--xpack.ruleRegistry.write.enabled=true',
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl

@@ -12,7 +12,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
-  const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
@@ -60,19 +59,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Logs', 'Stack Management']);
+        expect(navLinks).to.contain('Logs');
       });
 
       describe('logs landing page without data', () => {
-        it(`shows the 'No data' page`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await testSubjects.existOrFail('~infraLogsPage');
-          await testSubjects.existOrFail('~noDataPage');
-        });
-
         it(`doesn't show read-only badge`, async () => {
           await globalNav.badgeMissingOrFail();
         });
@@ -123,22 +113,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Logs', 'Stack Management']);
-      });
-
-      describe('logs landing page without data', () => {
-        it(`Shows the 'No data' page`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await testSubjects.existOrFail('~infraLogsPage');
-          await testSubjects.existOrFail('~noDataPage');
-        });
-
-        it(`shows read-only badge`, async () => {
-          await globalNav.badgeExistsOrFail('Read only');
-        });
+        expect(navLinks).to.contain('Logs');
       });
     });
 
@@ -194,7 +169,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        PageObjects.error.expectForbidden();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -20,15 +20,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const browser = getService('browser');
   const fieldName = 'clientip';
   const deployment = getService('deployment');
   const retry = getService('retry');
   const security = getService('security');
+  const dataGrid = getService('dataGrid');
 
-  const clickFieldAndCheckUrl = async (fieldLink: WebElementWrapper) => {
-    const fieldValue = await fieldLink.getVisibleText();
-    await fieldLink.click();
+  const checkUrl = async (fieldValue: string) => {
     const windowHandlers = await browser.getAllWindowHandles();
     expect(windowHandlers.length).to.equal(2);
     await browser.switchToWindow(windowHandlers[1]);
@@ -37,7 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(currentUrl).to.equal(fieldUrl);
   };
 
-  describe('Changing field formatter to Url', () => {
+  // Fails in chrome 129+: https://github.com/elastic/kibana-operations/issues/199
+  describe.skip('Changing field formatter to Url', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -63,11 +64,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('applied on dashboard', async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('dashboard with table');
       await dashboard.waitForRenderComplete();
       const fieldLink = await visChart.getFieldLinkInVisTable(`${fieldName}: Descending`);
-      await clickFieldAndCheckUrl(fieldLink);
+      const fieldValue = await fieldLink.getVisibleText();
+      await fieldLink.moveMouseTo();
+      await fieldLink.click();
+      await retry.try(async () => {
+        await checkUrl(fieldValue);
+      });
     });
 
     it('applied on discover', async () => {
@@ -76,12 +82,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.setTime({ from, to });
       await common.navigateToApp('discover');
       await discover.selectIndexPattern('logstash-*');
-      await testSubjects.click('docTableExpandToggleColumn');
+      await dataGrid.clickRowToggle();
       await retry.waitForWithTimeout(`${fieldName} is visible`, 30000, async () => {
         return await testSubjects.isDisplayed(`tableDocViewRow-${fieldName}-value`);
       });
-      const fieldLink = await testSubjects.find(`tableDocViewRow-${fieldName}-value`);
-      await clickFieldAndCheckUrl(fieldLink);
+      const fieldLink = await find.byCssSelector(
+        `[data-test-subj="tableDocViewRow-${fieldName}-value"] a`
+      );
+      const fieldValue = await fieldLink.getVisibleText();
+      await retry.try(async () => {
+        await fieldLink.click();
+        await checkUrl(fieldValue);
+      });
     });
 
     afterEach(async function () {

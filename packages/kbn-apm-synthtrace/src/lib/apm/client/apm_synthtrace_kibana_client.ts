@@ -1,105 +1,176 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fetch from 'node-fetch';
+import pRetry from 'p-retry';
 import { Logger } from '../../utils/create_logger';
+import { kibanaHeaders } from '../../shared/client_headers';
+import { getFetchAgent } from '../../../cli/utils/ssl';
 
 export class ApmSynthtraceKibanaClient {
-  constructor(private readonly logger: Logger) {}
+  private readonly logger: Logger;
+  private target: string;
+  private headers: Record<string, string>;
 
-  async migrateCloudToManagedApm(cloudId: string, username: string, password: string) {
-    await this.logger.perf('migrate_apm_on_cloud', async () => {
-      this.logger.info('attempting to migrate cloud instance over to managed APM');
-      const cloudUrls = Buffer.from(cloudId.split(':')[1], 'base64').toString().split('$');
-      const kibanaCloudUrl = `https://${cloudUrls[2]}.${cloudUrls[0]}`;
-      const response = await fetch(
-        kibanaCloudUrl + '/internal/apm/fleet/cloud_apm_package_policy',
-        {
-          method: 'POST', // *GET, POST, PUT, DELETE, etc.
-          headers: {
-            Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'kbn-xsrf': 'kibana',
-          },
-        }
-      );
+  constructor(options: { logger: Logger; target: string; headers?: Record<string, string> }) {
+    this.logger = options.logger;
+    this.target = options.target;
+    this.headers = { ...kibanaHeaders(), ...(options.headers ?? {}) };
+  }
+
+  getFleetApmPackagePath(packageVersion?: string): string {
+    let path = `${this.target}/api/fleet/epm/packages/apm`;
+    if (packageVersion) {
+      path = `${path}/${packageVersion}`;
+    }
+    return path;
+  }
+
+  async fetchLatestApmPackageVersion() {
+    this.logger.debug(`Fetching latest APM package version`);
+
+    const fetchPackageVersion = async ({ prerelease }: { prerelease: boolean }) => {
+      const url = `${this.getFleetApmPackagePath()}?prerelease=${prerelease}`;
+      this.logger.debug(`Fetching from URL: ${url}`);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.headers,
+        agent: getFetchAgent(url),
+      });
+
       const responseJson = await response.json();
-      if (responseJson.message) {
-        this.logger.info(`Cloud Instance already migrated to managed APM: ${responseJson.message}`);
-      }
-      if (responseJson.cloudApmPackagePolicy) {
-        this.logger.info(
-          `Cloud Instance migrated to managed APM: ${responseJson.cloudApmPackagePolicy.package.version}`
+
+      if (response.status !== 200) {
+        throw new Error(
+          `Failed to fetch APM package version, received HTTP ${response.status} and message: ${responseJson.message}`
         );
       }
-    });
+
+      // Add support for 7.x stack as latest version is available under different node
+      if (responseJson.response && responseJson.response.latestVersion) {
+        return responseJson.response.latestVersion as string;
+      }
+
+      return responseJson.item.latestVersion as string;
+    };
+
+    try {
+      return await fetchPackageVersion({ prerelease: true });
+    } catch (error) {
+      this.logger.debug(
+        'Fetching latestes prerelease version failed, retrying with latest GA version'
+      );
+      const retryResult = await fetchPackageVersion({ prerelease: false }).catch((retryError) => {
+        throw retryError;
+      });
+
+      return retryResult;
+    }
   }
 
-  async discoverLocalKibana() {
-    return await fetch('http://localhost:5601', {
-      method: 'HEAD',
-      follow: 1,
-      redirect: 'manual',
-    }).then((res) => {
-      const kibanaUrl = res.headers.get('location');
-      this.logger.info(`Discovered local kibana running at: ${kibanaUrl}`);
-      return kibanaUrl;
-    });
-  }
+  async installApmPackage(packageVersion?: string) {
+    this.logger.debug(`Installing APM package ${packageVersion}`);
+    if (!packageVersion) {
+      packageVersion = await this.fetchLatestApmPackageVersion();
+    }
 
-  async fetchLatestApmPackageVersion(
-    kibanaUrl: string,
-    version: string,
-    username: string,
-    password: string
-  ) {
-    const url = `${kibanaUrl}/api/fleet/epm/packages/apm`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: kibanaHeaders(username, password),
-    });
-    const json = (await response.json()) as { item: { latestVersion: string } };
-    const { latestVersion } = json.item;
-    return latestVersion;
-  }
+    const url = this.getFleetApmPackagePath(packageVersion);
+    const response = await pRetry(
+      async () => {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: this.headers,
+          body: '{"force":true}',
+          agent: getFetchAgent(url),
+        });
 
-  async installApmPackage(kibanaUrl: string, version: string, username: string, password: string) {
-    const packageVersion = await this.fetchLatestApmPackageVersion(
-      kibanaUrl,
-      version,
-      username,
-      password
+        if (!res.ok) {
+          const errorJson = await res.json();
+          const errorMessage =
+            typeof errorJson.message === 'string'
+              ? errorJson.message
+              : 'An error occurred during APM package installation.';
+          throw new Error(
+            `APM package installation returned ${res.status} status code\nError: ${errorMessage}`
+          );
+        }
+        return res;
+      },
+      {
+        retries: 5,
+        onFailedAttempt: (error) => {
+          this.logger.debug(
+            `APM package installation failure. ${error.retriesLeft >= 1 ? 'Retrying' : 'Aborting'}`
+          );
+        },
+      }
     );
-    const response = await fetch(`${kibanaUrl}/api/fleet/epm/packages/apm/${packageVersion}`, {
-      method: 'POST',
-      headers: kibanaHeaders(username, password),
-      body: '{"force":true}',
-    });
 
     const responseJson = await response.json();
 
-    if (responseJson.statusCode) {
-      throw Error(
-        `unable to install apm package ${packageVersion}. Received status code: ${responseJson.statusCode} and message: ${responseJson.message}`
+    if (!responseJson.items) {
+      throw new Error(
+        `No installed assets received for APM package version ${packageVersion}, received HTTP ${response.status} for url ${url}`
       );
     }
-    if (responseJson.items) {
-      this.logger.info(`Installed apm package ${packageVersion}`);
-    } else this.logger.error(responseJson);
-  }
-}
 
-function kibanaHeaders(username: string, password: string) {
-  return {
-    Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'kbn-xsrf': 'kibana',
-  };
+    this.logger.info(`Installed APM package ${packageVersion}`);
+    return { version: packageVersion };
+  }
+
+  async uninstallApmPackage() {
+    this.logger.debug('Uninstalling APM package');
+    const latestApmPackageVersion = await this.fetchLatestApmPackageVersion();
+
+    const url = this.getFleetApmPackagePath(latestApmPackageVersion);
+    const response = await pRetry(
+      async () => {
+        const res = await fetch(url, {
+          method: 'DELETE',
+          headers: this.headers,
+          body: '{"force":true}',
+          agent: getFetchAgent(url),
+        });
+
+        if (!res.ok) {
+          const errorJson = await res.json();
+          const errorMessage =
+            typeof errorJson.message === 'string'
+              ? errorJson.message
+              : 'An error occurred during APM package uninstallation.';
+          throw new Error(
+            `APM package uninstallation returned ${res.status} status code\nError: ${errorMessage}`
+          );
+        }
+        return res;
+      },
+      {
+        retries: 5,
+        onFailedAttempt: (error) => {
+          this.logger.debug(
+            `APM package version ${latestApmPackageVersion} uninstallation failure. ${
+              error.retriesLeft >= 1 ? 'Retrying' : 'Aborting'
+            }`
+          );
+        },
+      }
+    );
+
+    const responseJson = await response.json();
+
+    if (!responseJson.items) {
+      throw new Error(
+        `No uninstalled assets received for APM package version ${latestApmPackageVersion}, received HTTP ${response.status} for url ${url}`
+      );
+    }
+
+    this.logger.info(`Uninstalled APM package ${latestApmPackageVersion}`);
+  }
 }

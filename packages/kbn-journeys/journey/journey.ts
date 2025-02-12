@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
@@ -12,22 +13,28 @@ import { Page } from 'playwright';
 import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
-import { FtrProviderContext, KibanaServer } from '@kbn/ftr-common-functional-services';
+import { FtrProviderContext } from '../services/ftr_context_provider';
+import { Es, KibanaServer, Retry, Auth } from '../services';
 
-import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
 import { JourneyFtrHarness } from './journey_ftr_harness';
 import { makeFtrConfigProvider } from './journey_ftr_config';
 import { JourneyConfig, JourneyConfigOptions } from './journey_config';
+import { KibanaPage } from '../services/page/kibana_page';
+import { ProjectPage } from '../services/page/project_page';
 
 export interface BaseStepCtx {
+  kibanaPage: KibanaPage | ProjectPage;
   page: Page;
   log: ToolingLog;
   inputDelays: InputDelays;
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
+  es: Es;
+  retry: Retry;
+  auth: Auth;
 }
 
 export type AnyStep = Step<{}>;
@@ -82,7 +89,7 @@ export class Journey<CtxExt extends object> {
 
   /**
    * Create a Journey which should be exported from a file in the
-   * x-pack/performance/journeys directory.
+   * x-pack/performance/journeys_e2e directory.
    */
   constructor(opts?: JourneyConfigOptions<CtxExt>) {
     const path = callsites().at(1)?.getFileName();
@@ -96,7 +103,16 @@ export class Journey<CtxExt extends object> {
 
   /**
    * Define a step of this Journey. Steps are only separated from each other
-   * to aid in reading/debuging the journey and reading it's logging output.
+   * to aid in reading/debugging the journey and reading it's logging output.
+   * These services might be helpful:
+   *
+   * page: methods to interact with a single tab in a browser
+   *
+   * kbnUrl: get the URL for a Kibana plugin
+   *
+   * kibanaServer: basic Kibana server client
+   *
+   * es: basic Elasticsearch client
    *
    * If a journey fails, a failure report will be created with a screenshot
    * at the point of failure as well as a screenshot at the end of every
@@ -119,7 +135,9 @@ export class Journey<CtxExt extends object> {
       getService('config'),
       getService('esArchiver'),
       getService('kibanaServer'),
-      new Auth(getService('config'), getService('log'), getService('kibanaServer')),
+      getService('es'),
+      getService('retry'),
+      getService('auth'),
       this.config
     ).initMochaSuite(this.#steps);
   }

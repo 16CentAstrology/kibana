@@ -5,25 +5,13 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { resolve } from 'path';
-import fs from 'fs';
-import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
-  );
-
-  // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
-  const examplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'examples'));
-  const examples = examplesFiles.filter((file) =>
-    fs.statSync(resolve(KIBANA_ROOT, 'examples', file)).isDirectory()
-  );
-
-  const xpackExamplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'x-pack/examples'));
-  const xpackExamples = xpackExamplesFiles.filter((file) =>
-    fs.statSync(resolve(KIBANA_ROOT, 'x-pack/examples', file)).isDirectory()
   );
 
   return {
@@ -37,7 +25,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('./search_examples'),
       require.resolve('./embedded_lens'),
-      require.resolve('./reporting_examples'),
       require.resolve('./screenshotting'),
       require.resolve('./triggers_actions_ui_examples'),
     ],
@@ -49,12 +36,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
-        ...examples.map(
-          (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'examples', exampleDir)}`
-        ),
-        ...xpackExamples.map(
-          (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'x-pack/examples', exampleDir)}`
-        ),
+        // Needed for search_examples tests
+        '--data.search.sessions.enabled=true',
+        ...findTestPluginPaths([
+          resolve(KIBANA_ROOT, 'examples'),
+          resolve(KIBANA_ROOT, 'x-pack/examples'),
+        ]),
       ],
     },
   };

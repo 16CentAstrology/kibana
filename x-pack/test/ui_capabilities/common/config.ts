@@ -7,6 +7,7 @@
 
 import path from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 import { services } from './services';
 
@@ -24,6 +25,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       testFiles: [require.resolve(`../${name}/tests/`)],
       servers: xPackFunctionalTestsConfig.get('servers'),
       services,
@@ -45,7 +47,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'foo_plugin')}`,
+          `--plugin-path=${path.resolve(__dirname, 'plugins/foo_plugin')}`,
+          `--plugin-path=${path.resolve(
+            __dirname,
+            '../../security_api_integration/plugins/features_provider'
+          )}`,
         ],
       },
     };

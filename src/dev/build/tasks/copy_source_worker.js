@@ -1,35 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const { writeFileSync, readFileSync, copyFileSync, mkdirSync } = require('fs');
 const { resolve, extname, dirname } = require('path');
 
 const { optimize } = require('svgo');
-const { transformFileSync } = require('@babel/core');
+const { transformCode } = require('@kbn/babel-transform');
 
-const presets = require('@kbn/babel-preset/node_preset');
-
-const { REPO_ROOT } = require('@kbn/utils');
+const { REPO_ROOT } = require('@kbn/repo-info');
 const BUILD_ROOT = resolve(REPO_ROOT, 'build', 'kibana');
-
-const babelOptions = {
-  presets: [[presets, { 'kibana/rootDir': REPO_ROOT }]],
-  cwd: REPO_ROOT,
-  babelrc: false,
-  sourceMaps: false,
-  ast: false,
-};
 
 const svgOptions = {
   removeComments: false,
 };
 
-module.exports = ({ source }) => {
+module.exports = async ({ source }) => {
   const absoluteSource = resolve(REPO_ROOT, source);
   const absoluteDest = resolve(BUILD_ROOT, source);
 
@@ -40,12 +31,16 @@ module.exports = ({ source }) => {
     case '.js':
     case '.ts':
     case '.tsx':
-      const output = transformFileSync(absoluteSource, babelOptions);
+      const output = transformCode(absoluteSource, undefined, {
+        disableSourceMaps: true,
+      });
+
       if (output.code) {
         const dest = absoluteDest.substring(0, absoluteDest.lastIndexOf('.')) + '.js';
         writeFileSync(dest, output.code);
       }
       break;
+
     case '.svg':
       const input = readFileSync(absoluteSource, 'utf-8');
       const result = optimize(input, {
@@ -58,7 +53,9 @@ module.exports = ({ source }) => {
         writeFileSync(absoluteDest, output);
       }
       break;
+
     default:
       copyFileSync(absoluteSource, absoluteDest);
+      break;
   }
 };

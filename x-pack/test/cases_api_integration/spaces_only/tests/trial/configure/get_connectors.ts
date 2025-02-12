@@ -10,18 +10,18 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
+  getAuthWithSuperUser,
+  getActionsSpace,
   getServiceNowConnector,
+  getServiceNowSIRConnector,
+  getEmailConnector,
+  getCaseConnectors,
+  getCasesWebhookConnector,
   getServiceNowOAuthConnector,
   getJiraConnector,
-  getResilientConnector,
   createConnector,
-  getServiceNowSIRConnector,
-  getAuthWithSuperUser,
-  getCaseConnectors,
-  getActionsSpace,
-  getEmailConnector,
-  getCasesWebhookConnector,
-} from '../../../../common/lib/utils';
+  getResilientConnector,
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -77,13 +77,13 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(space, sir.id, 'action', 'actions');
-      actionsRemover.add(space, snConnector.id, 'action', 'actions');
-      actionsRemover.add(space, snOAuthConnector.id, 'action', 'actions');
-      actionsRemover.add(space, emailConnector.id, 'action', 'actions');
-      actionsRemover.add(space, jiraConnector.id, 'action', 'actions');
-      actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
-      actionsRemover.add(space, casesWebhookConnector.id, 'action', 'actions');
+      actionsRemover.add(space, sir.id, 'connector', 'actions');
+      actionsRemover.add(space, snConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, snOAuthConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, emailConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, jiraConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, resilientConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, casesWebhookConnector.id, 'connector', 'actions');
 
       const connectors = await getCaseConnectors({
         supertest: supertestWithoutAuth,
@@ -110,12 +110,15 @@ export default ({ getService }: FtrProviderContext): void => {
             headers: { [`content-type`]: 'application/json' },
             viewIncidentUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
             getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+            getIncidentMethod: 'get',
+            getIncidentJson: null,
             updateIncidentJson:
               '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
             updateIncidentMethod: 'put',
             updateIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -129,6 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
             projectKey: 'pkey',
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -141,6 +145,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actionTypeId: '.servicenow',
           id: 'preconfigured-servicenow',
           isPreconfigured: true,
+          isSystemAction: false,
           isDeprecated: false,
           name: 'preconfigured-servicenow',
           referencedByCount: 0,
@@ -154,6 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
             orgId: 'pkey',
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -171,6 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
             userIdentifierValue: null,
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -188,6 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
             jwtKeyId: 'def',
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -205,6 +213,7 @@ export default ({ getService }: FtrProviderContext): void => {
             userIdentifierValue: null,
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -249,12 +258,12 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(space, sir.id, 'action', 'actions');
-      actionsRemover.add(space, snConnector.id, 'action', 'actions');
-      actionsRemover.add(space, snOAuthConnector.id, 'action', 'actions');
-      actionsRemover.add(space, emailConnector.id, 'action', 'actions');
-      actionsRemover.add(space, jiraConnector.id, 'action', 'actions');
-      actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
+      actionsRemover.add(space, sir.id, 'connector', 'actions');
+      actionsRemover.add(space, snConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, snOAuthConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, emailConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, jiraConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, resilientConnector.id, 'connector', 'actions');
 
       const connectors = await getCaseConnectors({
         supertest: supertestWithoutAuth,
@@ -270,6 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actionTypeId: '.servicenow',
           id: 'preconfigured-servicenow',
           isPreconfigured: true,
+          isSystemAction: false,
           isDeprecated: false,
           name: 'preconfigured-servicenow',
           referencedByCount: 0,

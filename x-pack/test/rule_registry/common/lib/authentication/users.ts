@@ -29,6 +29,9 @@ import {
   observabilityOnlyReadSpace2,
   observabilityMinReadAlertsAllSpacesAll,
   observabilityOnlyAllSpacesAllWithReadESIndices,
+  securitySolutionOnlyAllSpacesAllWithReadESIndices,
+  stackAlertsOnlyReadSpacesAll as stackAlertsOnlyReadSpacesAllRole,
+  stackAlertsOnlyAllSpacesAll as stackAlertsOnlyAllSpacesAllRole,
 } from './roles';
 import { User } from './types';
 
@@ -128,6 +131,12 @@ export const obsOnlyReadSpacesAll: User = {
   roles: [observabilityOnlyReadSpacesAll.name],
 };
 
+export const stackAlertsOnlyReadSpacesAll: User = {
+  username: 'stack_alerts_only_read_spaces_all',
+  password: 'stack_alerts_only_read_spaces_all',
+  roles: [stackAlertsOnlyReadSpacesAllRole.name],
+};
+
 export const users = [
   superUser,
   secOnly,
@@ -157,6 +166,12 @@ export const secOnlyReadSpacesAll: User = {
   roles: [securitySolutionOnlyReadSpacesAll.name],
 };
 
+export const secOnlySpacesAllEsReadAll: User = {
+  username: 'sec_only_all_spaces_all_with_read_es_indices',
+  password: 'sec_only_all_spaces_all_with_read_es_indices',
+  roles: [securitySolutionOnlyAllSpacesAllWithReadESIndices.name],
+};
+
 export const obsOnlySpacesAll: User = {
   username: 'obs_only_all_spaces_all',
   password: 'obs_only_all_spaces_all',
@@ -167,6 +182,12 @@ export const logsOnlySpacesAll: User = {
   username: 'logs_only_all_spaces_all',
   password: 'logs_only_all_spaces_all',
   roles: [logsOnlyAllSpacesAll.name],
+};
+
+export const stackAlertsOnlyAllSpacesAll: User = {
+  username: 'stack_alerts_only_all_spaces_all',
+  password: 'stack_alerts_only_all_spaces_all',
+  roles: [stackAlertsOnlyAllSpacesAllRole.name],
 };
 
 export const obsOnlySpacesAllEsRead: User = {
@@ -279,9 +300,12 @@ export const allUsers = [
   noKibanaPrivileges,
   obsOnlyReadSpacesAll,
   secOnlySpacesAll,
+  secOnlySpacesAllEsReadAll,
   secOnlyReadSpacesAll,
   obsOnlySpacesAll,
   logsOnlySpacesAll,
+  stackAlertsOnlyReadSpacesAll,
+  stackAlertsOnlyAllSpacesAll,
   obsSecSpacesAll,
   obsSecReadSpacesAll,
   obsMinReadAlertsRead,

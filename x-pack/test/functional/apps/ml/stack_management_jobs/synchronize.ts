@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.api.deleteDataFrameAnalyticsJobES(dfaJobId);
       }
       await ml.testResources.cleanMLSavedObjects();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     it('should have nothing to sync initially', async () => {
@@ -61,6 +61,12 @@ export default function ({ getService }: FtrProviderContext) {
         ])
       );
       await ml.stackManagementJobs.assertSyncFlyoutSyncButtonEnabled(false);
+    });
+
+    it('should not have objects to sync', async () => {
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToAnomalyDetection();
+      await ml.overviewPage.assertJobSyncRequiredWarningNotExists();
     });
 
     it('should prepare test data', async () => {
@@ -102,8 +108,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should have objects to sync', async () => {
-      // sync required warning is displayed
-      await ml.navigation.navigateToMl();
+      await ml.jobTable.refreshJobList();
+
       await ml.overviewPage.assertJobSyncRequiredWarningExists();
 
       // object counts in sync flyout are all 1, sync button is enabled

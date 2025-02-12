@@ -1,9 +1,16 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "skipLibCheck": false
+    "outDir": "target/types",
+    "types": [
+      "jest",
+    ],
   },
   "include": [
-    "expect.d.ts"
+    "expect.d.ts",
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

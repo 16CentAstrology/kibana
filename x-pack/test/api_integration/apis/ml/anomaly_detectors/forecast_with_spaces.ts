@@ -8,13 +8,14 @@
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
   const spacesService = getService('spaces');
+  const retry = getService('retry');
 
   const forecastJobId = 'fq_single_forecast';
   const forecastJobDatafeedId = `datafeed-${forecastJobId}`;
@@ -29,16 +30,39 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number
   ) {
     const { body, status } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors/${jobId}/_forecast`)
+      .post(`${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors/${jobId}/_forecast`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ duration });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
 
+  async function deleteForecast(
+    jobId: string,
+    forecastId: string,
+    space: string,
+    user: USER,
+    expectedStatusCode: number
+  ) {
+    await retry.tryForTime(10000, async () => {
+      const { body, status } = await supertest
+        .delete(
+          `${
+            space ? `/s/${space}` : ''
+          }/internal/ml/anomaly_detectors/${jobId}/_forecast/${forecastId}`
+        )
+        .auth(user, ml.securityCommon.getPasswordForUser(user))
+        .set(getCommonRequestHeader('1'));
+      ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
+
+      return body;
+    });
+  }
+
   describe('POST anomaly_detectors _forecast with spaces', function () {
+    let forecastId: string;
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -79,11 +103,20 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.waitForDatafeedState(forecastJobDatafeedId, DATAFEED_STATE.STOPPED);
       await ml.api.waitForJobState(forecastJobId, JOB_STATE.CLOSED);
       await ml.api.openAnomalyDetectionJob(forecastJobId);
-      await runForecast(forecastJobId, idSpace1, '1d', USER.ML_POWERUSER, 200);
+      const resp = await runForecast(forecastJobId, idSpace1, '1d', USER.ML_POWERUSER, 200);
+      forecastId = resp.forecast_id;
       await ml.testExecution.logTestStep(
         `forecast results should exist for job '${forecastJobId}'`
       );
       await ml.api.assertForecastResultsExist(forecastJobId);
+    });
+
+    it('should not delete forecast for user without permissions', async () => {
+      await deleteForecast(forecastJobId, forecastId, idSpace1, USER.ML_VIEWER, 403);
+    });
+
+    it('should delete forecast for user with permissions', async () => {
+      await deleteForecast(forecastJobId, forecastId, idSpace1, USER.ML_POWERUSER, 200);
     });
 
     it('should not run forecast for open job with invalid duration', async () => {

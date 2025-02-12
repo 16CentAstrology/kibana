@@ -17,20 +17,14 @@
         "tags": [],
         "label": "DocumentMigrator",
         "description": [
-          "\nA concrete implementation of the VersionedTransformer interface."
+          "\nA concrete implementation of the {@link IDocumentMigrator} interface."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsMigrationServerInternalPluginApi",
-            "section": "def-server.DocumentMigrator",
-            "text": "DocumentMigrator"
-          },
+          "DocumentMigrator",
           " implements ",
-          "VersionedTransformer"
+          "IDocumentMigrator"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,8 +36,7 @@
               "prop",
               "prop",
               "prop",
-              "prop",
-              "memberof"
+              "prop"
             ],
             "label": "Constructor",
             "description": [
@@ -52,7 +45,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -61,12 +54,12 @@
                 "id": "def-server.DocumentMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    typeRegistry,\n    kibanaVersion,\n    minimumConvertVersion = DEFAULT_MINIMUM_CONVERT_VERSION,\n    log,\n  }",
+                "label": "options",
                 "description": [],
                 "signature": [
                   "DocumentMigratorOptions"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -76,45 +69,52 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-server.DocumentMigrator.migrationVersion",
-            "type": "Object",
-            "tags": [
-              "readonly",
-              "type",
-              "memberof"
-            ],
-            "label": "migrationVersion",
+            "id": "def-server.DocumentMigrator.getMigrationVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getMigrationVersion",
             "description": [
-              "\nGets the latest version of each migrate-able property.\n"
+              "\nGets the latest pending version of each type.\nSome migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)."
             ],
             "signature": [
+              "({ includeDeferred, migrationType, }?: MigrationVersionParams) => ",
+              "SavedObjectsMigrationVersion"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-server.DocumentMigrator.getMigrationVersion.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    includeDeferred = true,\n    migrationType = 'type',\n  }",
+                "description": [],
+                "signature": [
+                  "MigrationVersionParams"
+                ],
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-server.DocumentMigrator.prepareMigrations",
             "type": "Function",
-            "tags": [
-              "memberof"
-            ],
+            "tags": [],
             "label": "prepareMigrations",
             "description": [
-              "\nPrepares active migrations and document transformer function.\n"
+              "\nPrepares active migrations and document transformer function."
             ],
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -124,33 +124,21 @@
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-server.DocumentMigrator.migrate",
             "type": "Function",
-            "tags": [
-              "memberof"
-            ],
+            "tags": [],
             "label": "migrate",
             "description": [
-              "\nMigrates a document to the latest version.\n"
+              "\nMigrates a document to the latest version."
             ],
             "signature": [
               "(doc: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
-              "<unknown>) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
+              "<unknown>, { allowDowngrade, targetTypeVersion }?: ",
+              "DocumentMigrateOptions",
+              ") => ",
+              "SavedObjectUnsanitizedDoc",
               "<unknown>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -162,16 +150,25 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
-                    "text": "SavedObjectUnsanitizedDoc"
-                  },
+                  "SavedObjectUnsanitizedDoc",
                   "<unknown>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-server.DocumentMigrator.migrate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ allowDowngrade = false, targetTypeVersion }",
+                "description": [],
+                "signature": [
+                  "DocumentMigrateOptions"
+                ],
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -183,33 +180,19 @@
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-server.DocumentMigrator.migrateAndConvert",
             "type": "Function",
-            "tags": [
-              "memberof"
-            ],
+            "tags": [],
             "label": "migrateAndConvert",
             "description": [
-              "\nMigrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may\nhave been created during the transformation process.\n"
+              "\nMigrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may\nhave been created during the transformation process."
             ],
             "signature": [
               "(doc: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<unknown>) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<unknown>[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -221,16 +204,64 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
-                    "text": "SavedObjectUnsanitizedDoc"
-                  },
+                  "SavedObjectUnsanitizedDoc",
                   "<unknown>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.DocumentMigrator.isDowngradeRequired",
+            "type": "Function",
+            "tags": [],
+            "label": "isDowngradeRequired",
+            "description": [
+              "\nReturns true if the provided document has a higher version that the `targetTypeVersion`\n(defaulting to the last known version), false otherwise."
+            ],
+            "signature": [
+              "(doc: ",
+              "SavedObjectUnsanitizedDoc",
+              "<unknown>, { targetTypeVersion }?: ",
+              "IsDowngradeRequiredOptions",
+              ") => boolean"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-server.DocumentMigrator.isDowngradeRequired.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  "SavedObjectUnsanitizedDoc",
+                  "<unknown>"
+                ],
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-server.DocumentMigrator.isDowngradeRequired.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ targetTypeVersion }",
+                "description": [],
+                "signature": [
+                  "IsDowngradeRequiredOptions"
+                ],
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -251,17 +282,11 @@
           "\nManages the shape of mappings and documents in the Kibana index."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsMigrationServerInternalPluginApi",
-            "section": "def-server.KibanaMigrator",
-            "text": "KibanaMigrator"
-          },
+          "KibanaMigrator",
           " implements ",
           "IKibanaMigrator"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -272,7 +297,7 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,7 +313,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -297,23 +322,34 @@
                 "id": "def-server.KibanaMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n  }",
+                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    defaultIndexTypesMap,\n    hashToVersionMap,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n    nodeRoles,\n    esCapabilities,\n  }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-migration-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsMigrationServerInternalPluginApi",
-                    "section": "def-server.KibanaMigratorOptions",
-                    "text": "KibanaMigratorOptions"
-                  }
+                  "KibanaMigratorOptions"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigrator.getDocumentMigrator",
+            "type": "Function",
+            "tags": [],
+            "label": "getDocumentMigrator",
+            "description": [],
+            "signature": [
+              "() => ",
+              "DocumentMigrator"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -328,7 +364,7 @@
               "MigrationResult",
               "[]>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -339,7 +375,7 @@
                 "tags": [],
                 "label": "{ rerun = false }",
                 "description": [],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -353,7 +389,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+                    "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -372,7 +408,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -392,7 +428,7 @@
               "KibanaMigratorStatus",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -409,7 +445,7 @@
               "() => ",
               "IndexMapping"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -424,24 +460,14 @@
             "description": [],
             "signature": [
               "(doc: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
-              "<unknown>) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
+              "<unknown>, { allowDowngrade }?: ",
+              "MigrateDocumentOptions",
+              ") => ",
+              "SavedObjectUnsanitizedDoc",
               "<unknown>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -453,16 +479,25 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
-                    "text": "SavedObjectUnsanitizedDoc"
-                  },
+                  "SavedObjectUnsanitizedDoc",
                   "<unknown>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-server.KibanaMigrator.migrateDocument.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ allowDowngrade = false }",
+                "description": [],
+                "signature": [
+                  "MigrateDocumentOptions"
+                ],
+                "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -490,7 +525,7 @@
           " | undefined) => ",
           "QueryDslQueryContainer"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,7 +541,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -524,7 +559,7 @@
               "QueryDslBoolQuery",
               " | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -546,19 +581,15 @@
         ],
         "signature": [
           "(typeDefinitions: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsMappingProperties",
-            "text": "SavedObjectsMappingProperties"
-          },
+          "SavedObjectsMappingProperties",
           " | ",
           "SavedObjectsTypeMappingDefinitions",
-          ") => ",
+          ", _meta: ",
+          "IndexMappingMeta",
+          " | undefined) => ",
           "IndexMapping"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/build_active_mappings.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_active_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -572,17 +603,66 @@
               "- the type definitions to build mapping from."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsMappingProperties",
-                "text": "SavedObjectsMappingProperties"
-              },
+              "SavedObjectsMappingProperties",
               " | ",
               "SavedObjectsTypeMappingDefinitions"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/build_active_mappings.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_active_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.buildActiveMappings.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "IndexMappingMeta",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_active_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-server.buildTypesMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "buildTypesMappings",
+        "description": [
+          "\nMerge mappings from all registered saved object types."
+        ],
+        "signature": [
+          "(types: ",
+          "SavedObjectsType",
+          "<any>[]) => ",
+          "SavedObjectsTypeMappingDefinitions"
+        ],
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_types_mappings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.buildTypesMappings.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "types",
+            "description": [],
+            "signature": [
+              "SavedObjectsType",
+              "<any>[]"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_types_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -601,7 +681,7 @@
           "\nWrite the up-to-date transformed documents to the index, overwriting any\ndocuments that are still on their outdated version."
         ],
         "signature": [
-          "({ client, index, transformedDocs, refresh, }: ",
+          "({ client, index, operations, refresh, useAliasToPreventAutoCreate, }: ",
           "BulkOverwriteTransformedDocumentsParams",
           ") => ",
           "TaskEither",
@@ -615,7 +695,7 @@
           "RequestEntityTooLargeException",
           ", \"bulk_index_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -624,12 +704,12 @@
             "id": "def-server.bulkOverwriteTransformedDocuments.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    index,\n    transformedDocs,\n    refresh = false,\n  }",
+            "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n    useAliasToPreventAutoCreate = false,\n  }",
             "description": [],
             "signature": [
               "BulkOverwriteTransformedDocumentsParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -656,7 +736,7 @@
           "CalculatedExcludeFilter",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/calculate_exclude_filters.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/calculate_exclude_filters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -670,7 +750,48 @@
             "signature": [
               "CalculateExcludeFiltersParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/calculate_exclude_filters.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/calculate_exclude_filters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-server.checkClusterRoutingAllocationEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "checkClusterRoutingAllocationEnabled",
+        "description": [],
+        "signature": [
+          "(client: ",
+          "ElasticsearchClient",
+          ") => ",
+          "TaskEither",
+          "<",
+          "RetryableEsClientError",
+          " | ",
+          "IncompatibleClusterRoutingAllocation",
+          ", {}>"
+        ],
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_cluster_routing_allocation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.checkClusterRoutingAllocationEnabled.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_cluster_routing_allocation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -697,7 +818,7 @@
           "UnknownDocsFound",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/check_for_unknown_docs.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_for_unknown_docs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -711,7 +832,7 @@
             "signature": [
               "CheckForUnknownDocsParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/check_for_unknown_docs.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_for_unknown_docs.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -730,7 +851,7 @@
           "\nMakes a clone of the source index into the target.\n"
         ],
         "signature": [
-          "({ client, source, target, timeout, }: ",
+          "({ client, esCapabilities, source, target, timeout, }: ",
           "CloneIndexParams",
           ") => ",
           "TaskEither",
@@ -742,11 +863,13 @@
           "IndexNotGreenTimeout",
           " | ",
           "ClusterShardLimitExceeded",
+          " | ",
+          "OperationNotSupported",
           ", ",
           "AcknowledgeResponse",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/clone_index.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/clone_index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -755,12 +878,12 @@
             "id": "def-server.cloneIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  source,\n  target,\n  timeout = DEFAULT_TIMEOUT,\n}",
+            "label": "{\n  client,\n  esCapabilities,\n  source,\n  target,\n  timeout = DEFAULT_TIMEOUT,\n}",
             "description": [],
             "signature": [
               "CloneIndexParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/clone_index.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/clone_index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -785,7 +908,7 @@
           "RetryableEsClientError",
           ", {}>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/close_pit.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/close_pit.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -799,7 +922,96 @@
             "signature": [
               "ClosePitParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/close_pit.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/close_pit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-server.createBulkDeleteOperationBody",
+        "type": "Function",
+        "tags": [],
+        "label": "createBulkDeleteOperationBody",
+        "description": [
+          "\nGiven a document id, creates a valid body to delete the document using the Bulk API."
+        ],
+        "signature": [
+          "(_id: string) => ",
+          "BulkOperationContainer"
+        ],
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.createBulkDeleteOperationBody.$1",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-server.createBulkIndexOperationTuple",
+        "type": "Function",
+        "tags": [],
+        "label": "createBulkIndexOperationTuple",
+        "description": [
+          "\nGiven a document, creates a valid body to index the document using the Bulk API."
+        ],
+        "signature": [
+          "(doc: ",
+          "SavedObjectsRawDoc",
+          ", typeIndexMap?: Record<string, string>) => ",
+          "BulkIndexOperationTuple"
+        ],
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.createBulkIndexOperationTuple.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "SavedObjectsRawDoc"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.createBulkIndexOperationTuple.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "typeIndexMap",
+            "description": [],
+            "signature": [
+              "Record<string, string>"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -818,7 +1030,7 @@
           "\nCreates an index with the given mappings\n"
         ],
         "signature": [
-          "({ client, indexName, mappings, aliases, timeout, }: ",
+          "({ client, indexName, mappings, esCapabilities, aliases, timeout, waitForIndexStatusTimeout, }: ",
           "CreateIndexParams",
           ") => ",
           "TaskEither",
@@ -828,9 +1040,11 @@
           "IndexNotGreenTimeout",
           " | ",
           "ClusterShardLimitExceeded",
-          ", \"create_index_succeeded\">"
+          ", ",
+          "CreateIndexSuccessResponse",
+          ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/create_index.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/create_index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -839,12 +1053,12 @@
             "id": "def-server.createIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  indexName,\n  mappings,\n  aliases = [],\n  timeout = DEFAULT_TIMEOUT,\n}",
+            "label": "{\n  client,\n  indexName,\n  mappings,\n  esCapabilities,\n  aliases = [],\n  timeout = DEFAULT_TIMEOUT,\n  waitForIndexStatusTimeout = DEFAULT_TIMEOUT,\n}",
             "description": [],
             "signature": [
               "CreateIndexParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/create_index.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/create_index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -873,7 +1087,7 @@
           "FetchIndexResponse",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/fetch_indices.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/fetch_indices.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -887,50 +1101,7 @@
             "signature": [
               "FetchIndicesParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/fetch_indices.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-server.initAction",
-        "type": "Function",
-        "tags": [],
-        "label": "initAction",
-        "description": [],
-        "signature": [
-          "({ client, indices, }: ",
-          "InitActionParams",
-          ") => ",
-          "TaskEither",
-          "<",
-          "RetryableEsClientError",
-          " | ",
-          "IncompatibleClusterRoutingAllocation",
-          ", ",
-          "FetchIndexResponse",
-          ">"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/initialize_action.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-server.initAction.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  client,\n  indices,\n}",
-            "description": [],
-            "signature": [
-              "InitActionParams"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/initialize_action.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/fetch_indices.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -951,7 +1122,7 @@
           "ErrorCause",
           " | undefined) => boolean"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -966,7 +1137,7 @@
               "ErrorCause",
               " | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -987,7 +1158,7 @@
           "ErrorCause",
           " | undefined) => boolean"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1002,7 +1173,7 @@
               "ErrorCause",
               " | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1023,7 +1194,7 @@
           "ErrorCause",
           " | undefined) => boolean"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1038,7 +1209,7 @@
               "ErrorCause",
               " | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1059,7 +1230,7 @@
           "ErrorCause",
           " | undefined) => boolean"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1074,61 +1245,10 @@
               "ErrorCause",
               " | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-server.mergeTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "mergeTypes",
-        "description": [
-          "\nMerges savedObjectMappings properties into a single object, verifying that\nno mappings are redefined."
-        ],
-        "signature": [
-          "(types: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
-          "<any>[]) => ",
-          "SavedObjectsTypeMappingDefinitions"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-server.mergeTypes.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "types",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
-              "<any>[]"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1152,7 +1272,7 @@
           "OpenPitResponse",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/open_pit.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/open_pit.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1166,7 +1286,7 @@
             "signature": [
               "OpenPitParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/open_pit.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/open_pit.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1182,32 +1302,22 @@
         "tags": [],
         "label": "pickupUpdatedMappings",
         "description": [
-          "\nPickup updated mappings by performing an update by query operation on all\ndocuments in the index. Returns a task ID which can be\ntracked for progress.\n"
+          "\nPickup updated mappings by performing an update by query operation on all\ndocuments matching the passed in query. Returns a task ID which can be\ntracked for progress.\n"
         ],
         "signature": [
           "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
-          ", index: string) => ",
+          "ElasticsearchClient",
+          ", index: string, batchSize: number, query?: ",
+          "QueryDslQueryContainer",
+          " | undefined) => ",
           "TaskEither",
           "<",
           "RetryableEsClientError",
           ", ",
-          {
-            "pluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsMigrationServerInternalPluginApi",
-            "section": "def-server.UpdateByQueryResponse",
-            "text": "UpdateByQueryResponse"
-          },
+          "UpdateByQueryResponse",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1219,15 +1329,9 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1242,10 +1346,41 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.pickupUpdatedMappings.$3",
+            "type": "number",
+            "tags": [],
+            "label": "batchSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.pickupUpdatedMappings.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1259,17 +1394,19 @@
         "label": "readWithPit",
         "description": [],
         "signature": [
-          "({ client, pitId, query, batchSize, searchAfter, seqNoPrimaryTerm, }: ",
+          "({ client, pitId, query, batchSize, searchAfter, seqNoPrimaryTerm, maxResponseSizeBytes, }: ",
           "ReadWithPitParams",
           ") => ",
           "TaskEither",
           "<",
           "RetryableEsClientError",
+          " | ",
+          "EsResponseTooLargeError",
           ", ",
           "ReadWithPit",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/read_with_pit.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/read_with_pit.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1278,12 +1415,12 @@
             "id": "def-server.readWithPit.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    pitId,\n    query,\n    batchSize,\n    searchAfter,\n    seqNoPrimaryTerm,\n  }",
+            "label": "{\n    client,\n    pitId,\n    query,\n    batchSize,\n    searchAfter,\n    seqNoPrimaryTerm,\n    maxResponseSizeBytes,\n  }",
             "description": [],
             "signature": [
               "ReadWithPitParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/read_with_pit.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/read_with_pit.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1302,7 +1439,7 @@
           "\nWait for Elasticsearch to reindex all the changes."
         ],
         "signature": [
-          "({ client, targetIndex, }: ",
+          "({ client, index, }: ",
           "RefreshIndexParams",
           ") => ",
           "TaskEither",
@@ -1310,7 +1447,7 @@
           "RetryableEsClientError",
           ", { refreshed: boolean; }>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/refresh_index.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/refresh_index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1319,12 +1456,12 @@
             "id": "def-server.refreshIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    targetIndex,\n  }",
+            "label": "{\n    client,\n    index,\n  }",
             "description": [],
             "signature": [
               "RefreshIndexParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/refresh_index.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/refresh_index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1343,7 +1480,7 @@
           "\nReindex documents from the `sourceIndex` into the `targetIndex`. Returns a\ntask ID which can be tracked for progress.\n"
         ],
         "signature": [
-          "({ client, sourceIndex, targetIndex, reindexScript, requireAlias, excludeOnUpgradeQuery, }: ",
+          "({ client, sourceIndex, targetIndex, reindexScript, requireAlias, excludeOnUpgradeQuery, batchSize, }: ",
           "ReindexParams",
           ") => ",
           "TaskEither",
@@ -1353,7 +1490,7 @@
           "ReindexResponse",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/reindex.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/reindex.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1362,12 +1499,12 @@
             "id": "def-server.reindex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    sourceIndex,\n    targetIndex,\n    reindexScript,\n    requireAlias,\n    excludeOnUpgradeQuery,\n  }",
+            "label": "{\n    client,\n    sourceIndex,\n    targetIndex,\n    reindexScript,\n    requireAlias,\n    excludeOnUpgradeQuery,\n    batchSize,\n  }",
             "description": [],
             "signature": [
               "ReindexParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/reindex.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/reindex.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1394,7 +1531,7 @@
           "RetryableEsClientError",
           ", \"remove_write_block_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/remove_write_block.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/remove_write_block.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1408,79 +1545,7 @@
             "signature": [
               "RemoveWriteBlockParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/remove_write_block.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-server.searchForOutdatedDocuments",
-        "type": "Function",
-        "tags": [],
-        "label": "searchForOutdatedDocuments",
-        "description": [
-          "\nSearch for outdated saved object documents with the provided query. Will\nreturn one batch of documents. Searching should be repeated until no more\noutdated documents can be found.\n\nUsed for testing only"
-        ],
-        "signature": [
-          "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
-          ", options: ",
-          "SearchForOutdatedDocumentsOptions",
-          ") => ",
-          "TaskEither",
-          "<",
-          "RetryableEsClientError",
-          ", ",
-          "SearchResponse",
-          ">"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-server.searchForOutdatedDocuments.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "client",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-server.searchForOutdatedDocuments.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "SearchForOutdatedDocumentsOptions"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/remove_write_block.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1509,7 +1574,7 @@
           "IndexNotFound",
           ", \"set_write_block_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/set_write_block.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/set_write_block.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1523,7 +1588,7 @@
             "signature": [
               "SetWriteBlockParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/set_write_block.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/set_write_block.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1545,24 +1610,12 @@
           ") => ",
           "TaskEither",
           "<",
-          {
-            "pluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsMigrationServerInternalPluginApi",
-            "section": "def-server.DocumentsTransformFailed",
-            "text": "DocumentsTransformFailed"
-          },
+          "DocumentsTransformFailed",
           ", ",
-          {
-            "pluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsMigrationServerInternalPluginApi",
-            "section": "def-server.DocumentsTransformSuccess",
-            "text": "DocumentsTransformSuccess"
-          },
+          "DocumentsTransformSuccess",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/transform_docs.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/transform_docs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1576,7 +1629,7 @@
             "signature": [
               "TransformDocsParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/transform_docs.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/transform_docs.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1609,7 +1662,7 @@
           "RemoveIndexNotAConcreteIndex",
           ", \"update_aliases_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_aliases.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_aliases.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1623,7 +1676,7 @@
             "signature": [
               "UpdateAliasesParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_aliases.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_aliases.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1642,7 +1695,7 @@
           "\nUpdates an index's mappings and runs an pickupUpdatedMappings task so that the mapping\nchanges are \"picked up\". Returns a taskId to track progress."
         ],
         "signature": [
-          "({ client, index, mappings, }: ",
+          "({ client, index, mappings, batchSize, query, }: ",
           "UpdateAndPickupMappingsParams",
           ") => ",
           "TaskEither",
@@ -1652,7 +1705,7 @@
           "UpdateAndPickupMappingsResponse",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_and_pickup_mappings.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_and_pickup_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1661,12 +1714,12 @@
             "id": "def-server.updateAndPickupMappings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  index,\n  mappings,\n}",
+            "label": "{\n  client,\n  index,\n  mappings,\n  batchSize,\n  query,\n}",
             "description": [],
             "signature": [
               "UpdateAndPickupMappingsParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_and_pickup_mappings.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_and_pickup_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1677,37 +1730,39 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-server.updateTargetMappingsMeta",
+        "id": "def-server.updateMappings",
         "type": "Function",
         "tags": [],
-        "label": "updateTargetMappingsMeta",
+        "label": "updateMappings",
         "description": [
-          "\nUpdates an index's mappings _meta information"
+          "\nAttempts to update the SO index mappings.\nIncludes an automatic retry mechanism for retriable errors.\nReturns an 'update_mappings_succeeded' upon success.\nIf changes in the mappings are NOT compatible and the update fails on ES side,\nthis method will return an 'incompatible_mapping_exception'."
         ],
         "signature": [
-          "({ client, index, meta, }: ",
-          "UpdateTargetMappingsMetaParams",
+          "({ client, index, mappings, }: ",
+          "UpdateMappingsParams",
           ") => ",
           "TaskEither",
           "<",
           "RetryableEsClientError",
-          ", \"update_mappings_meta_succeeded\">"
+          " | ",
+          "IncompatibleMappingException",
+          ", \"update_mappings_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_target_mappings_meta.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-server.updateTargetMappingsMeta.$1",
+            "id": "def-server.updateMappings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    index,\n    meta,\n  }",
+            "label": "{\n  client,\n  index,\n  mappings,\n}",
             "description": [],
             "signature": [
-              "UpdateTargetMappingsMetaParams"
+              "UpdateMappingsParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_target_mappings_meta.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1734,7 +1789,7 @@
           "IndexNotYellowTimeout",
           ", {}>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1749,7 +1804,7 @@
               "WaitForIndexStatusParams",
               " & { status: \"yellow\"; }"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1776,7 +1831,7 @@
           "IndexNotGreenTimeout",
           ", {}>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1791,7 +1846,7 @@
               "WaitForIndexStatusParams",
               " & { status: \"green\"; }"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1822,7 +1877,7 @@
           "IndexNotYellowTimeout",
           ", {}>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1836,7 +1891,7 @@
             "signature": [
               "WaitForIndexStatusParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1863,7 +1918,7 @@
           "WaitForTaskCompletionTimeout",
           ", \"pickup_updated_mappings_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_pickup_updated_mappings_task.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_pickup_updated_mappings_task.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1909,7 +1964,7 @@
           "IncompatibleMappingException",
           ", \"reindex_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_reindex_task.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_reindex_task.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1953,7 +2008,7 @@
           "WaitForTaskResponse",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_task.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_task.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1967,7 +2022,7 @@
             "signature": [
               "WaitForTaskParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_task.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_task.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1985,7 +2040,7 @@
         "tags": [],
         "label": "DocumentsTransformFailed",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1996,7 +2051,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2010,7 +2065,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2025,7 +2080,7 @@
               "TransformErrorObjects",
               "[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2037,16 +2092,10 @@
             "label": "processedDocs",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsRawDoc",
-                "text": "SavedObjectsRawDoc"
-              },
+              "SavedObjectsRawDoc",
               "[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2060,7 +2109,7 @@
         "tags": [],
         "label": "DocumentsTransformSuccess",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2072,16 +2121,49 @@
             "label": "processedDocs",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsRawDoc",
-                "text": "SavedObjectsRawDoc"
-              },
+              "SavedObjectsRawDoc",
               "[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-server.EsResponseTooLargeError",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsResponseTooLargeError",
+        "description": [],
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.EsResponseTooLargeError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"es_response_too_large\""
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.EsResponseTooLargeError.contentLength",
+            "type": "number",
+            "tags": [],
+            "label": "contentLength",
+            "description": [],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2095,7 +2177,7 @@
         "tags": [],
         "label": "KibanaMigratorOptions",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2107,7 +2189,59 @@
             "label": "client",
             "description": [],
             "signature": [
-              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
+              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "UpdateResponse",
+              "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "UpdateResponse",
+              "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "UpdateResponse",
+              "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -2159,9 +2293,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; cluster: ",
-              "default",
-              "; eql: ",
+              ">; }; helpers: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -2195,97 +2327,13 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
-              "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; <TDocument = unknown>(this: That, params: ",
-              "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "WriteResponseBase",
-              ", unknown>>; <TDocument = unknown>(this: That, params: ",
-              "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; }; monitoring: ",
-              "default",
-              "; security: ",
-              "default",
-              "; index: { <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
-              "IndexRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
-              "IndexRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "WriteResponseBase",
-              ", unknown>>; <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
-              "IndexRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument>, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "UpdateResponse",
-              "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument>, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "UpdateResponse",
-              "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument>, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "UpdateResponse",
-              "<TDocumentR>>; }; asyncSearch: ",
-              "default",
-              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
-              "default",
-              "; helpers: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
+              "default",
+              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -2315,6 +2363,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
+              ">; }; capabilities: { (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TODO",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -2371,7 +2445,11 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; count: { (this: That, params?: ",
+              ">; }; cluster: ",
+              "default",
+              "; connector: ",
+              "default",
+              "; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -2478,6 +2556,10 @@
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
               ">; }; enrich: ",
+              "default",
+              "; eql: ",
+              "default",
+              "; esql: ",
               "default",
               "; exists: { (this: That, params: ",
               "ExistsRequest",
@@ -2675,9 +2757,63 @@
               "TransportRequestOptions",
               " | undefined): Promise<TDocument>; }; graph: ",
               "default",
-              "; ilm: ",
+              "; healthReport: { (this: That, params?: ",
+              "HealthReportRequest",
+              " | ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "HealthReportResponse",
+              ">; (this: That, params?: ",
+              "HealthReportRequest",
+              " | ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "HealthReportResponse",
+              ", unknown>>; (this: That, params?: ",
+              "HealthReportRequest",
+              " | ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "HealthReportResponse",
+              ">; }; ilm: ",
               "default",
-              "; indices: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; indices: ",
+              "default",
+              "; inference: ",
               "default",
               "; info: { (this: That, params?: ",
               "InfoRequest",
@@ -2766,6 +2902,8 @@
               "<TDocument>>; }; migration: ",
               "default",
               "; ml: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; msearch: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -2905,7 +3043,9 @@
               "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
+              " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               " | ",
               "PutScriptRequest",
@@ -2931,7 +3071,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
-              ">; }; rankEval: { (this: That, params: ",
+              ">; }; queryRules: ",
+              "default",
+              "; rankEval: { (this: That, params: ",
               "RankEvalRequest",
               " | ",
               "RankEvalRequest",
@@ -3095,7 +3237,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ScrollResponse",
-              "<TDocument, TAggregations>>; }; searchMvt: { (this: That, params: ",
+              "<TDocument, TAggregations>>; }; searchApplication: ",
+              "default",
+              "; searchMvt: { (this: That, params: ",
               "SearchMvtRequest",
               " | ",
               "SearchMvtRequest",
@@ -3169,7 +3313,11 @@
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
               "default",
+              "; security: ",
+              "default",
               "; shutdown: ",
+              "default",
+              "; simulate: ",
               "default",
               "; slm: ",
               "default",
@@ -3178,6 +3326,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; synonyms: ",
               "default",
               "; tasks: ",
               "default",
@@ -3295,7 +3445,7 @@
               "default",
               "; }"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3307,15 +3457,37 @@
             "label": "typeRegistry",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              }
+              "ISavedObjectTypeRegistry"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigratorOptions.defaultIndexTypesMap",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultIndexTypesMap",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigratorOptions.hashToVersionMap",
+            "type": "Object",
+            "tags": [],
+            "label": "hashToVersionMap",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3327,17 +3499,25 @@
             "label": "soMigrationsConfig",
             "description": [],
             "signature": [
-              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly pollInterval: number; readonly skip: boolean; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              "; readonly maxReadBatchSizeBytes: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               "; readonly scrollDuration: string; readonly retryAttempts: number; }"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3348,7 +3528,7 @@
             "tags": [],
             "label": "kibanaIndex",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3359,7 +3539,7 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3373,13 +3553,13 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3391,15 +3571,9 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-server.DocLinksServiceSetup",
-                "text": "DocLinksServiceSetup"
-              }
+              "DocLinksServiceSetup"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3410,7 +3584,35 @@
             "tags": [],
             "label": "waitForMigrationCompletion",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigratorOptions.nodeRoles",
+            "type": "Object",
+            "tags": [],
+            "label": "nodeRoles",
+            "description": [],
+            "signature": [
+              "NodeRoles"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigratorOptions.esCapabilities",
+            "type": "Object",
+            "tags": [],
+            "label": "esCapabilities",
+            "description": [],
+            "signature": [
+              "ElasticsearchCapabilities"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3424,7 +3626,7 @@
         "tags": [],
         "label": "UpdateByQueryResponse",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3435,7 +3637,7 @@
             "tags": [],
             "label": "taskId",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3452,57 +3654,18 @@
         "tags": [],
         "label": "REMOVED_TYPES",
         "description": [
-          "\nTypes that are no longer registered and need to be removed"
+          "\nTypes that are no longer registered and need to be removed\nAs of 8.8, no new types are allowed to be removed.\nRemoving saved object types is not backward compatible"
         ],
         "signature": [
           "string[]"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/unused_types.ts",
+        "path": "src/core/packages/saved-objects/migration-server-internal/src/core/unused_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-server.MIGRATION_CLIENT_OPTIONS",
-        "type": "Object",
-        "tags": [],
-        "label": "MIGRATION_CLIENT_OPTIONS",
-        "description": [
-          "\nTo avoid the Elasticsearch-js client aborting our requests before we\nreceive a response from Elasticsearch we choose a requestTimeout that's\nlonger than the DEFAULT_TIMEOUT.\n\nThis timeout is only really valuable for preventing migrations from being\nstuck waiting forever for a response when the underlying socket is broken.\n\nWe also set maxRetries to 0 so that the state action machine can handle all\nretries. This way we get exponential back-off and logging for failed\nactions."
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-server.MIGRATION_CLIENT_OPTIONS.maxRetries",
-            "type": "number",
-            "tags": [],
-            "label": "maxRetries",
-            "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-server.MIGRATION_CLIENT_OPTIONS.requestTimeout",
-            "type": "number",
-            "tags": [],
-            "label": "requestTimeout",
-            "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   },
   "common": {
     "classes": [],

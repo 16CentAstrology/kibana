@@ -6,37 +6,37 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from '../functional/services';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { pageObjects } from '../functional/page_objects';
+import { services } from '../functional/services';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-src/functional/config.base')
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
   const idpPath = resolve(
     __dirname,
-    '../security_api_integration/fixtures/saml/saml_provider/metadata.xml'
+    '../security_api_integration/plugins/saml_provider/metadata.xml'
   );
-  const idpNeverLoginPath = resolve(
-    __dirname,
-    '../security_api_integration/fixtures/saml/idp_metadata_never_login.xml'
+  const idpNeverLoginPath = require.resolve(
+    '@kbn/security-api-integration-helpers/saml/idp_metadata_never_login.xml'
   );
-  const samlIdPPlugin = resolve(
-    __dirname,
-    '../security_api_integration/fixtures/saml/saml_provider'
-  );
+  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
 
-  const testEndpointsPlugin = resolve(__dirname, './fixtures/common/test_endpoints');
+  const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [resolve(__dirname, './tests/login_selector')],
 
     services,
@@ -74,6 +74,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${samlIdPPlugin}`,
         `--plugin-path=${testEndpointsPlugin}`,
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
+        '--server.restrictInternalApis=false',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--xpack.security.loginHelp="Some-login-help."`,
         `--xpack.security.authc.providers=${JSON.stringify({

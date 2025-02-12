@@ -41,8 +41,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
     await setFarequoteTimerange();
 
-    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-    await dashboardPanelActions.openContextMenuMorePanel(header);
+    await dashboardPanelActions.openContextMenuByTitle(selectedPanelTitle);
   }
 
   async function createJobInWizard(
@@ -107,7 +106,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     let tabsCount = 1;
@@ -129,15 +128,15 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -154,15 +153,15 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -179,15 +178,15 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(1);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(1);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -202,9 +201,9 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
@@ -216,7 +215,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      ml.lensVisualizations.assertMLJobMenuActionDoesNotExist();
+      await ml.lensVisualizations.assertMLJobMenuActionDoesNotExist(selectedPanelTitle);
     });
   });
 }

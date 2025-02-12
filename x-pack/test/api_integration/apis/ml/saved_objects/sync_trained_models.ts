@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 type ModelType = 'regression' | 'classification';
 
@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body, status } = await supertest
       .get(`/s/${idSpace1}/api/ml/saved_objects/sync`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('2023-10-31'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
@@ -38,9 +38,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runSyncCheckRequest(user: USER, expectedStatusCode: number) {
     const { body, status } = await supertest
-      .post(`/s/${idSpace1}/api/ml/saved_objects/sync_check`)
+      .post(`/s/${idSpace1}/internal/ml/saved_objects/sync_check`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ mlSavedObjectType: 'trained-model' });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
@@ -187,7 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
       const model1 = getTestModel(modelIdSpace1, 'classification', dfaJobId1);
       await ml.api.createTrainedModelES(model1.model_id, model1.body);
 
-      // create trained model not linked to job, it should have the current space
+      // create trained model not linked to job, it should have * space after sync
       const model2 = getTestModel(modelIdSpace2, 'classification');
       await ml.api.createTrainedModelES(model2.model_id, model2.body);
 
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
       await runSyncRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
       await ml.api.assertTrainedModelSpaces(modelIdSpace1, [idSpace1, idSpace2]);
-      await ml.api.assertTrainedModelSpaces(modelIdSpace2, [idSpace1]);
+      await ml.api.assertTrainedModelSpaces(modelIdSpace2, ['*']);
     });
   });
 };

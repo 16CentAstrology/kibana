@@ -3768,6 +3768,7 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "codec": "best_compression",
         "mapping": {
           "total_fields": {
@@ -4221,8 +4222,7 @@
             "transaction.message.queue.name",
             "fields.*"
           ]
-        },
-        "refresh_interval": "1ms"
+        }
       }
     }
   }

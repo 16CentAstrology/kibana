@@ -21,6 +21,70 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.dynamic",
+        "type": "Function",
+        "tags": [],
+        "label": "dynamic",
+        "description": [
+          "\nLazy load and wrap with Suspense any component.\n"
+        ],
+        "signature": [
+          "(loader: Loader<TElement>, options: ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.DynamicOptions",
+            "text": "DynamicOptions"
+          },
+          ") => React.ForwardRefExoticComponent<React.PropsWithoutRef<React.ComponentPropsWithRef<TElement>> & React.RefAttributes<TRef>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.dynamic.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "loader",
+            "description": [],
+            "signature": [
+              "Loader<TElement>"
+            ],
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.dynamic.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-utility",
+                "scope": "common",
+                "docId": "kibKbnSharedUxUtilityPluginApi",
+                "section": "def-common.DynamicOptions",
+                "text": "DynamicOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
         "id": "def-common.Fallback",
         "type": "Function",
         "tags": [],
@@ -29,9 +93,9 @@
           "\nA simple implementation of `React.Suspense.fallback` that renders a loading spinner."
         ],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/fallback.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/fallback.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -50,7 +114,7 @@
         "signature": [
           "(element: HTMLElement | null | undefined, container?: HTMLElement | undefined) => HTMLAnchorElement | undefined"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,7 +128,7 @@
             "signature": [
               "HTMLElement | null | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -79,7 +143,7 @@
             "signature": [
               "HTMLElement | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -100,7 +164,7 @@
         "signature": [
           "(event: React.MouseEvent<Element, MouseEvent>) => boolean"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,7 +178,7 @@
             "signature": [
               "React.MouseEvent<Element, MouseEvent>"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -130,12 +194,20 @@
         "tags": [],
         "label": "withSuspense",
         "description": [
-          "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
+          "\nA HOC which supplies React.Suspense with a fallback component, and a `KibanaErrorBoundary` to contain errors."
         ],
         "signature": [
-          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          "> & React.RefAttributes<R>>"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -151,7 +223,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -168,7 +240,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -178,7 +250,71 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.DynamicOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "DynamicOptions",
+        "description": [
+          "\nOptions for the lazy loaded component"
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.DynamicOptions.fallback",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fallback",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.WithSuspenseExtendedDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "WithSuspenseExtendedDeps",
+        "description": [
+          "\nOptional services that the Suspense wrapper can use"
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.WithSuspenseExtendedDeps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "\nThe `AnalyticsServiceStart` object from `CoreStart`"
+            ],
+            "signature": [
+              "AnalyticsServiceStart",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

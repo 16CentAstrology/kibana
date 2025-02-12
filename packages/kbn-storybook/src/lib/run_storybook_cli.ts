@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
@@ -12,7 +13,7 @@ import buildStandalone from '@storybook/react/standalone';
 import { Flags, run } from '@kbn/dev-cli-runner';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import { REPO_ROOT } from '@kbn/utils';
+
 // @ts-expect-error internal dep of storybook
 import interpret from 'interpret'; // eslint-disable-line import/no-extraneous-dependencies
 import * as constants from './constants';
@@ -42,7 +43,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       const staticDir = [
         UiSharedDepsNpm.distDir,
         UiSharedDepsSrc.distDir,
-        'src/plugins/kibana_react/public/assets:plugins/kibanaReact/assets',
+        'src/platform/plugins/shared/kibana_react/public/assets:plugins/kibanaReact/assets',
       ];
       const config: Record<string, any> = {
         configDir,
@@ -57,9 +58,9 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       logger.setLevel(getLogLevelFromFlags(flags));
 
       // force storybook to use our transpilation rather than ts-node or anything else
-      interpret.extensions['.ts'] = [join(REPO_ROOT, 'src/setup_node_env')];
-      interpret.extensions['.tsx'] = [join(REPO_ROOT, 'src/setup_node_env')];
-      interpret.extensions['.jsx'] = [join(REPO_ROOT, 'src/setup_node_env')];
+      interpret.extensions['.ts'] = [require.resolve('@kbn/babel-register/install')];
+      interpret.extensions['.tsx'] = [require.resolve('@kbn/babel-register/install')];
+      interpret.extensions['.jsx'] = [require.resolve('@kbn/babel-register/install')];
 
       await buildStandalone(config);
 

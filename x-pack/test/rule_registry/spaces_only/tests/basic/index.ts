@@ -11,6 +11,7 @@ import { createSpaces, deleteSpaces } from '../../../common/lib/authentication';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('rule registry spaces only: trial', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await createSpaces(getService);
     });
@@ -18,8 +19,5 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     after(async () => {
       await deleteSpaces(getService);
     });
-
-    // Basic
-    loadTestFile(require.resolve('./bootstrap'));
   });
 };

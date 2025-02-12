@@ -40,6 +40,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await reloadIndicesButton.isDisplayed()).to.be(true);
     });
 
+    describe('Indices', function () {
+      const testIndexName = `index-test-${Math.random()}`;
+
+      it('renders the indices tab', async () => {
+        // Navigate to the data streams tab
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify url
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`/indices`);
+
+        // Verify content
+        await retry.waitFor('Wait until indices table is visible.', async () => {
+          return await testSubjects.isDisplayed('indexTable');
+        });
+      });
+
+      it('can create an index', async () => {
+        await pageObjects.indexManagement.clickCreateIndexButton();
+        await pageObjects.indexManagement.setCreateIndexName(testIndexName);
+        await pageObjects.indexManagement.setCreateIndexMode('Lookup');
+        await pageObjects.indexManagement.clickCreateIndexSaveButton();
+        await pageObjects.indexManagement.expectIndexToExist(testIndexName);
+      });
+    });
+
     describe('Data streams', () => {
       it('renders the data streams tab', async () => {
         // Navigate to the data streams tab
@@ -90,6 +118,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // so we don't make any assertion about the presence or absence of component templates.
         const componentTemplateList = await testSubjects.exists('componentTemplateList');
         expect(componentTemplateList).to.be(true);
+      });
+    });
+
+    describe('Enrich policies', () => {
+      it('renders the enrich policies tab', async () => {
+        // Navigate to the component templates tab
+        await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify url
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`/enrich_policies`);
+
+        // Verify content
+        const enrichPoliciesList = await testSubjects.exists('sectionEmpty');
+        expect(enrichPoliciesList).to.be(true);
       });
     });
   });

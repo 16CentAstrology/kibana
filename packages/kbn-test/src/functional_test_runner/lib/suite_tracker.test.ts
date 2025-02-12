@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -12,11 +13,11 @@ import { join, resolve } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 
 jest.mock('fs');
-jest.mock('@kbn/utils', () => {
+jest.mock('@kbn/repo-info', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Lifecycle } from './lifecycle';
 import { SuiteTracker } from './suite_tracker';
 import { Suite } from '../fake_mocha_types';

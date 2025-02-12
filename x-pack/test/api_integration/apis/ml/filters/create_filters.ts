@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -42,7 +42,8 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 403,
         responseBody: {
           error: 'Forbidden',
-          message: 'Forbidden',
+          message:
+            'API [PUT /internal/ml/filters] is unauthorized for user, this action is granted by the Kibana privileges [ml:canCreateFilter]',
         },
       },
     },
@@ -58,7 +59,8 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 403,
         responseBody: {
           error: 'Forbidden',
-          message: 'Forbidden',
+          message:
+            'API [PUT /internal/ml/filters] is unauthorized for user, this action is granted by the Kibana privileges [ml:canCreateFilter]',
         },
       },
     },
@@ -108,9 +110,9 @@ export default ({ getService }: FtrProviderContext) => {
       const { testTitle, user, requestBody, expected } = testData;
       it(`${testTitle}`, async () => {
         const { body, status } = await supertest
-          .put(`/api/ml/filters`)
+          .put(`/internal/ml/filters`)
           .auth(user, ml.securityCommon.getPasswordForUser(user))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(expected.responseCode, status, body);
 

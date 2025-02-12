@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -18,11 +19,13 @@
 import { Args } from './lib/args.mjs';
 import { getHelp } from './lib/help.mjs';
 import { createFlagError, isCliError } from './lib/cli_error.mjs';
+import { checkIfRunningNativelyOnWindows } from './lib/windows.mjs';
 import { getCmd } from './commands/index.mjs';
 import { Log } from './lib/log.mjs';
+import External from './lib/external_packages.js';
 
 const start = Date.now();
-const args = new Args(process.argv.slice(2), process.env.CI ? ['--quiet'] : []);
+const args = new Args(process.argv.slice(2), []);
 const log = new Log(args.getLoggingLevel());
 const cmdName = args.getCommandName();
 
@@ -31,7 +34,7 @@ const cmdName = args.getCommandName();
  */
 async function tryToGetCiStatsReporter(log) {
   try {
-    const { CiStatsReporter } = await import('@kbn/ci-stats-reporter');
+    const { CiStatsReporter } = External['@kbn/ci-stats-reporter']();
     return CiStatsReporter.fromEnv(log);
   } catch {
     return;
@@ -39,6 +42,7 @@ async function tryToGetCiStatsReporter(log) {
 }
 
 try {
+  checkIfRunningNativelyOnWindows(log);
   const cmd = getCmd(cmdName);
 
   if (cmdName && !cmd) {

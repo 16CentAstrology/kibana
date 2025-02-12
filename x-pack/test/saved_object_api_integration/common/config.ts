@@ -6,9 +6,9 @@
  */
 
 import path from 'path';
-
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 import { services } from './services';
 
@@ -25,7 +25,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       kibana: {
         api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
         functional: await readConfigFile(
-          require.resolve('../../../../test/functional/config.base.js')
+          require.resolve('@kbn/test-suites-src/functional/config.base')
         ),
       },
       xpack: {
@@ -34,13 +34,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services,
       junit: {
         reportName: 'X-Pack Saved Object API Integration Tests -- ' + name,
       },
-
       esTestCluster: {
         ...config.xpack.api.get('esTestCluster'),
         license,
@@ -55,7 +55,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'saved_object_test_plugin')}`,
+          `--plugin-path=${path.resolve(__dirname, 'plugins/saved_object_test_plugin')}`,
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),

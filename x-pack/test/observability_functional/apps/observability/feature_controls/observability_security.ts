@@ -20,28 +20,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const config = getService('config');
+  const kibanaServer = getService('kibanaServer');
 
   describe('observability security feature controls', function () {
-    this.tags(['skipFirefox']);
+    this.tags(['skipFirefox', 'skipFIPS']);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/cases/default');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/cases/default');
+      // Since the above unload removes the default config,
+      // the following command will set it back to avoid changing the test environment
+      await kibanaServer.uiSettings.update(config.get('uiSettings.defaults'));
     });
 
-    it('Shows the no data page on load', async () => {
-      await PageObjects.common.navigateToActualUrl('observabilityCases');
-      await PageObjects.observability.expectNoDataPage();
-    });
-
-    describe('observability cases all privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/155090
+    // FLAKY: https://github.com/elastic/kibana/issues/155091
+    describe.skip('observability cases all privileges', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['all'],
+            observabilityCasesV3: ['all'],
             logs: ['all'],
           })
         );
@@ -88,12 +90,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('observability cases read-only privileges', () => {
+    describe('observability cases read-only privileges', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['read'],
+            observabilityCasesV3: ['read'],
             logs: ['all'],
           })
         );
@@ -141,7 +144,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no observability privileges', () => {
+    describe('no observability privileges', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await observability.users.setTestUserRole({
           elasticsearch: { cluster: [], indices: [], run_as: [] },

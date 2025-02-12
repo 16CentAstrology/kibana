@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const testEndpointsPlugin = resolve(
-    __dirname,
-    '../security_functional/fixtures/common/test_endpoints'
-  );
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
-  const auditLogPath = resolve(__dirname, './fixtures/audit/token.log');
+  const auditLogPath = resolve(__dirname, './packages/helpers/audit/token.log');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/token')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },

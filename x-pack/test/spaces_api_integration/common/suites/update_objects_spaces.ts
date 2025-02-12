@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { without, uniq } from 'lodash';
-import { SuperTest } from 'supertest';
-import {
-  SavedObjectsErrorHelpers,
-  SavedObjectsUpdateObjectsSpacesResponse,
-} from '@kbn/core/server';
-import { SPACES } from '../lib/spaces';
+import { uniq, without } from 'lodash';
+import type { Agent as SuperTestAgent } from 'supertest';
+
+import type { SavedObjectsUpdateObjectsSpacesResponse } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import expect from '@kbn/expect';
+
 import {
   expectResponses,
   getUrlPrefix,
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
-import {
+import type {
   ExpectResponseBody,
   TestDefinition,
   TestSuite,
 } from '../../../saved_object_api_integration/common/lib/types';
+import { SPACES } from '../lib/spaces';
 
 export interface UpdateObjectsSpacesTestDefinition extends TestDefinition {
   request: {
@@ -44,7 +45,7 @@ export interface UpdateObjectsSpacesTestCase {
   spacesToRemove: string[];
 }
 
-const TYPE = 'sharedtype';
+const TYPE = 'index-pattern';
 const createRequest = ({ objects, spacesToAdd, spacesToRemove }: UpdateObjectsSpacesTestCase) => ({
   objects: objects.map(({ id }) => ({ type: TYPE, id })),
   spacesToAdd,
@@ -60,7 +61,7 @@ const getTestTitle = ({ objects, spacesToAdd, spacesToRemove }: UpdateObjectsSpa
 export function updateObjectsSpacesTestSuiteFactory(
   es: Client,
   esArchiver: any,
-  supertest: SuperTest<any>
+  supertest: SuperTestAgent
 ) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody =
@@ -98,11 +99,11 @@ export function updateObjectsSpacesTestSuiteFactory(
             if (expectAliasDifference !== undefined) {
               // if we deleted an object that had an alias pointing to it, the alias should have been deleted as well
               if (!hasRefreshed) {
-                await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
+                await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
                 hasRefreshed = true;
               }
               const searchResponse = await es.search({
-                index: '.kibana',
+                index: ALL_SAVED_OBJECT_INDICES,
                 body: {
                   size: 0,
                   query: { terms: { type: ['legacy-url-alias'] } },
@@ -161,7 +162,7 @@ export function updateObjectsSpacesTestSuiteFactory(
             const requestBody = test.request;
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_update_objects_spaces`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

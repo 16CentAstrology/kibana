@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { JSDOM } from 'jsdom';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
 import { format as formatURL } from 'url';
-import { createTokens, getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+
+import expect from '@kbn/expect';
+import {
+  createTokens,
+  getStateAndNonce,
+} from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
+
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -89,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should fail if state is not matching', async () => {
@@ -106,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {

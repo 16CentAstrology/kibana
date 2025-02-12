@@ -21,8 +21,8 @@ export default function spaceSelectorFunctionalTests({
     'spaceSelector',
   ]);
   const spacesService = getService('spaces');
+  const sampleData = getService('sampleData');
 
-  // Failing: See https://github.com/elastic/kibana/issues/142155
   describe('Spaces', function () {
     const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
@@ -36,7 +36,11 @@ export default function spaceSelectorFunctionalTests({
       }
     });
 
-    this.tags('includeFirefox');
+    // FLAKY: https://github.com/elastic/kibana/issues/157760 (amongst others)
+    // Skipping only Firefox, as the flaky failures are caused by slow CI execution with new version of Firefox
+    // See also https://github.com/elastic/kibana/pull/158545
+    // Can un-comment line below when issue is resolved
+    // this.tags('includeFirefox');
     describe('Login Space Selector', () => {
       before(async () => {
         await PageObjects.security.forceLogout();
@@ -95,7 +99,7 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Search spaces in popover', () => {
+    describe('Search spaces in popover', function () {
       const spaceId = 'default';
       before(async () => {
         await PageObjects.security.forceLogout();
@@ -127,7 +131,7 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Spaces Data', () => {
+    describe('Spaces Data', function () {
       const spaceId = 'another-space';
       const sampleDataHash = '/tutorial_directory/sampleData';
 
@@ -155,20 +159,13 @@ export default function spaceSelectorFunctionalTests({
       });
 
       after(async () => {
-        // No need to remove the same sample data in both spaces, the index
-        // data will be removed in the first call. By feature limitation,
-        // the created saved objects in the second space will be broken but removed
-        // when we call esArchiver.unload('x-pack/test/functional/es_archives/spaces').
-        await PageObjects.common.navigateToApp('home', {
-          hash: sampleDataHash,
-        });
-        await PageObjects.home.removeSampleDataSet('logs');
+        await sampleData.testResources.removeKibanaSampleData('logs');
         await PageObjects.security.forceLogout();
       });
 
       describe('displays separate data for each space', () => {
         it('in the default space', async () => {
-          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.navigateToApp();
           await expectDashboardRenders('[Logs] Web Traffic');
         });
 

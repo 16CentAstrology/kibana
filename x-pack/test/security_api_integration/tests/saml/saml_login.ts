@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
-import url from 'url';
 import { resolve } from 'path';
+import { stringify } from 'query-string';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+import url from 'url';
+
 import expect from '@kbn/expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,
   getSAMLRequestId,
   getSAMLResponse,
-} from '../../fixtures/saml/saml_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
+
   const config = getService('config');
   const retry = getService('retry');
 
@@ -30,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
-      destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
       sessionIndex: String(randomness.naturalNumber()),
       ...options,
     });
@@ -38,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createLogoutRequest(options: { sessionIndex: string }) {
     return getLogoutRequest({
-      destination: `http://localhost:${kibanaServerConfig.port}/logout`,
+      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/logout`,
       ...options,
     });
   }
@@ -193,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
@@ -240,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
     });
 
@@ -614,6 +618,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
 
+        // Let's make sure that created tokens are available for search.
+        await getService('es').indices.refresh({ index: '.security-tokens' });
+
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
@@ -699,6 +706,9 @@ export default function ({ getService }: FtrProviderContext) {
         [
           'when access token document is missing',
           async () => {
+            // Let's make sure that created tokens are available for search.
+            await getService('es').indices.refresh({ index: '.security-tokens' });
+
             const esResponse = await getService('es').deleteByQuery({
               index: '.security-tokens',
               body: { query: { match: { doc_type: 'token' } } },
@@ -733,9 +743,9 @@ export default function ({ getService }: FtrProviderContext) {
         existingSessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
-      for (const [description, setup] of testScenarios) {
+      for (const [description, setupFn] of testScenarios) {
         it(`should renew session and redirect to the home page if login is for the same user ${description}`, async () => {
-          await setup();
+          await setupFn();
 
           const samlAuthenticationResponse = await supertest
             .post('/api/security/saml/callback')
@@ -763,7 +773,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it(`should create a new session and redirect to the \`overwritten_session\` if login is for another user ${description}`, async () => {
-          await setup();
+          await setupFn();
 
           const newUsername = 'c@d.e';
           const samlAuthenticationResponse = await supertest
@@ -796,7 +806,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../fixtures/audit/saml.log');
+      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/saml.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
@@ -837,7 +847,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(2);
@@ -875,7 +885,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(401);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(1);
@@ -884,6 +894,61 @@ export default function ({ getService }: FtrProviderContext) {
         expect(auditEvents[0].event.outcome).to.be('failure');
         expect(auditEvents[0].trace.id).to.be.ok();
         expect(auditEvents[0].kibana.authentication_provider).to.be('saml');
+      });
+    });
+
+    describe('Post-authentication failures', () => {
+      it('correctly handles unexpected post-authentication errors', async () => {
+        const samlAuthenticationResponse = await supertest
+          .post('/api/security/saml/callback')
+          .send({ SAMLResponse: await createSAMLResponse() })
+          .expect(302);
+
+        // User should be redirected to the base URL.
+        expect(samlAuthenticationResponse.headers.location).to.be('/');
+
+        const cookies = samlAuthenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        await checkSessionCookie(parseCookie(cookies[0])!);
+
+        const sessionCookie = parseCookie(cookies[0])!.cookieString();
+        // Non-auth flow routes
+        await supertest
+          .get('/authentication/app/not_auth_flow')
+          .set('Cookie', sessionCookie)
+          .expect(200);
+
+        await supertest
+          .get('/authentication/app/not_auth_flow?statusCode=400')
+          .set('Cookie', sessionCookie)
+          .expect(400);
+
+        const { text: nonauthFlow500ResponseText } = await supertest
+          .get('/authentication/app/not_auth_flow?statusCode=500')
+          .set('Cookie', sessionCookie)
+          .expect(500);
+        expect(nonauthFlow500ResponseText).to.eql(
+          '{"statusCode":500,"error":"Internal Server Error","message":"500 response"}'
+        );
+
+        // Auth-flow routes
+        await supertest
+          .get('/authentication/app/auth_flow')
+          .set('Cookie', sessionCookie)
+          .expect(200);
+
+        const { text: authFlow401ResponseText } = await supertest
+          .get('/authentication/app/auth_flow?statusCode=401')
+          .set('Cookie', sessionCookie)
+          .expect(401);
+        expect(authFlow401ResponseText).to.contain('We hit an authentication error');
+
+        const { text: authFlow500ResponseText } = await supertest
+          .get('/authentication/app/auth_flow?statusCode=500')
+          .set('Cookie', sessionCookie)
+          .expect(500);
+        expect(authFlow500ResponseText).to.contain('We hit an authentication error');
       });
     });
   });

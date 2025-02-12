@@ -22,7 +22,7 @@
         "tags": [],
         "label": "mockCoreContext",
         "description": [],
-        "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+        "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,9 +45,9 @@
               " | undefined; logger?: jest.Mocked<",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LoggerFactory",
+                "section": "def-common.LoggerFactory",
                 "text": "LoggerFactory"
               },
               "> | undefined; configService?: jest.Mocked<",
@@ -55,16 +55,16 @@
               "> | undefined; }) => ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
               "CoreContext",
               ">"
             ],
-            "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+            "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -88,16 +88,16 @@
                   " | undefined; logger?: jest.Mocked<",
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.LoggerFactory",
+                    "section": "def-common.LoggerFactory",
                     "text": "LoggerFactory"
                   },
                   "> | undefined; configService?: jest.Mocked<",
                   "IConfigService",
                   "> | undefined; }"
                 ],
-                "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+                "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

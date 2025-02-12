@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
@@ -20,6 +20,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
   const headerPage = getPageObject('header');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
     async assertRegressionEvaluatePanelElementsExists() {
@@ -56,6 +57,10 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       await testSubjects.existOrFail('mlExplorationDataGrid loaded', { timeout: 5000 });
     },
 
+    async selectResultsTablePage(page: number) {
+      await commonDataGrid.selectPage('mlExplorationDataGrid loaded', page);
+    },
+
     async assertResultsTableTrainingFiltersExist() {
       await testSubjects.existOrFail('mlDFAnalyticsExplorationQueryBarFilterButtons', {
         timeout: 5000,
@@ -72,6 +77,26 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
         expectedCheckState,
         `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async getViewContainer() {
+      return find.byCssSelector('div.vgaVis__view');
+    },
+
+    async assertOpensExploreInCustomVisualization() {
+      await testSubjects.existOrFail('mlSplomExploreInCustomVisualizationLink', {
+        timeout: 5000,
+      });
+      await testSubjects.click('mlSplomExploreInCustomVisualizationLink');
+      await testSubjects.existOrFail('visualizationLoader');
+
+      const view = await this.getViewContainer();
+      expect(view).to.be.ok();
+      const size = await view.getSize();
+      expect(size).to.have.property('width');
+      expect(size).to.have.property('height');
+      expect(size.width).to.be.above(0);
+      expect(size.height).to.be.above(0);
     },
 
     async enableResultsTablePreviewHistogramCharts(expectedButtonState: boolean) {
@@ -259,16 +284,17 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
       await this.assertScatterplotMatrixLoaded();
       await this.scrollScatterplotMatrixIntoView();
-      await mlCommonUI.assertColorsInCanvasElement(
-        'mlDFExpandableSection-splom',
-        expectedValue,
-        ['#000000'],
-        undefined,
-        undefined,
-        // increased tolerance up from 10 to 20
-        // since the returned randomized colors vary quite a bit on each run.
-        20
-      );
+      // TODO Revisit after Borealis update is fully done
+      // await mlCommonUI.assertColorsInCanvasElement(
+      //   'mlDFExpandableSection-splom',
+      //   expectedValue,
+      //   ['#000000'],
+      //   undefined,
+      //   undefined,
+      //   // increased tolerance up from 10 to 20
+      //   // since the returned randomized colors vary quite a bit on each run.
+      //   20
+      // );
     },
 
     async assertFeatureImportanceDecisionPathChartElementsExists() {
@@ -295,7 +321,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async openFeatureImportancePopover() {
-      this.assertResultsTableNotEmpty();
+      await this.assertResultsTableNotEmpty();
 
       await retry.tryForTime(30 * 1000, async () => {
         const featureImportanceCell = await this.getFirstFeatureImportanceCell();

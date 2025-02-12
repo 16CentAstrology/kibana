@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security app - login selector', function () {
     loadTestFile(require.resolve('./basic_functionality'));
     loadTestFile(require.resolve('./auth_provider_hint'));
+    loadTestFile(require.resolve('./reset_session_page'));
   });
 }

@@ -19,7 +19,7 @@ import {
   createCase,
   deleteAllCaseItems,
   getCase,
-} from '../../../cases_api_integration/common/lib/utils';
+} from '../../../cases_api_integration/common/lib/api';
 import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 
 const secAll: Role = {
@@ -37,7 +37,7 @@ const secAll: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCases: ['all'],
+          securitySolutionCasesV3: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -68,7 +68,7 @@ const secRead: Role = {
       {
         feature: {
           siem: ['read'],
-          securitySolutionCases: ['read'],
+          securitySolutionCasesV3: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

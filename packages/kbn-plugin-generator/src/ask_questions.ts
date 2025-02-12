@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import inquirer from 'inquirer';
 
 export interface Answers {
@@ -32,12 +33,40 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
     value: Path.resolve(REPO_ROOT, 'src/plugins'),
   },
   {
+    name: 'Kibana Platform OSS (private)',
+    value: Path.resolve(REPO_ROOT, 'src/platform/plugins/private'),
+  },
+  {
+    name: 'Kibana Platform OSS (shared)',
+    value: Path.resolve(REPO_ROOT, 'src/platform/plugins/shared'),
+  },
+  {
     name: 'Kibana OSS Functional Testing',
     value: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
   },
   {
     name: 'X-Pack',
     value: Path.resolve(REPO_ROOT, 'x-pack/plugins'),
+  },
+  {
+    name: 'X-Pack Platform (private)',
+    value: Path.resolve(REPO_ROOT, 'x-pack/platform/plugins/private'),
+  },
+  {
+    name: 'X-Pack Platform (shared)',
+    value: Path.resolve(REPO_ROOT, 'x-pack/platform/plugins/shared'),
+  },
+  {
+    name: 'X-Pack Observability',
+    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/observability/plugins'),
+  },
+  {
+    name: 'X-Pack Security',
+    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/security/plugins'),
+  },
+  {
+    name: 'X-Pack Search',
+    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/search/plugins'),
   },
   {
     name: 'X-Pack Functional Testing',
@@ -58,41 +87,15 @@ export const QUESTIONS = [
     default: undefined,
   },
   {
-    name: 'internal',
-    type: 'confirm',
-    message: 'Will this plugin be part of the Kibana repository?',
-    default: false,
-  },
-  {
-    name: 'internalLocation',
-    type: 'list',
-    message: 'What type of internal plugin would you like to create',
-    choices: INTERNAL_PLUGIN_LOCATIONS,
-    default: INTERNAL_PLUGIN_LOCATIONS[0].value,
-    when: ({ internal }: Answers) => internal,
-  },
-  {
     name: 'ownerName',
     message: 'Who is developing and maintaining this plugin?',
     default: undefined,
     when: ({ internal }: Answers) => !internal,
   },
   {
-    name: 'ownerName',
-    message: 'What team will maintain this plugin?',
-    default: undefined,
-    when: ({ internal }: Answers) => internal,
-  },
-  {
-    name: 'githubTeam',
-    message: 'What is your gitHub team alias?',
-    default: undefined,
-    when: ({ internal }: Answers) => internal,
-  },
-  {
     name: 'ui',
     type: 'confirm',
-    message: 'Should an UI plugin be generated?',
+    message: 'Should a UI plugin be generated?',
     default: true,
   },
   {

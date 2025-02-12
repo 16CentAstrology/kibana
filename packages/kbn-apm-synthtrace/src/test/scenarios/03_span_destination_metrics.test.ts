@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm } from '../../lib/apm';
-import { timerange } from '../../lib/timerange';
-import { getSpanDestinationMetrics } from '../../lib/apm/processors/get_span_destination_metrics';
-import { StreamProcessor } from '../../lib/stream_processor';
-import { ApmFields } from '../../lib/apm/apm_fields';
+import { apm, timerange, ApmFields } from '@kbn/apm-synthtrace-client';
+import { sortBy } from 'lodash';
+import { Readable } from 'stream';
+import { createSpanMetricsAggregator } from '../../lib/apm/aggregators/create_span_metrics_aggregator';
+import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 
 describe('span destination metrics', () => {
   let events: Array<Record<string, any>>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const javaService = apm.service({
       name: 'opbeans-java',
       environment: 'production',
@@ -27,9 +28,9 @@ describe('span destination metrics', () => {
       new Date('2021-01-01T00:00:00.000Z'),
       new Date('2021-01-01T00:15:00.000Z')
     );
-    const processor = new StreamProcessor<ApmFields>({ processors: [getSpanDestinationMetrics] });
-    events = processor
-      .streamToArray(
+
+    const serialized = [
+      ...Array.from(
         range
           .interval('1m')
           .rate(25)
@@ -51,7 +52,9 @@ describe('span destination metrics', () => {
                   .destination('elasticsearch')
                   .success()
               )
-          ),
+          )
+      ),
+      ...Array.from(
         range
           .interval('1m')
           .rate(50)
@@ -79,8 +82,14 @@ describe('span destination metrics', () => {
                   .success()
               )
           )
+      ),
+    ].flatMap((event) => event.serialize());
+
+    events = (
+      await awaitStream<ApmFields>(
+        Readable.from(sortBy(serialized, '@timestamp')).pipe(createSpanMetricsAggregator('1m'))
       )
-      .filter((fields) => fields['metricset.name'] === 'service_destination');
+    ).filter((fields) => fields['metricset.name'] === 'service_destination');
   });
 
   it('generates the right amount of span metrics', () => {

@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import globby from 'globby';
-import * as ts from 'typescript';
 import * as path from 'path';
 import { parseUsageCollection } from './ts_parser';
 import { TelemetryRC } from './config';
-import { compilerHost } from './compiler_host';
+import { createKibanaProgram, getAllSourceFiles } from './ts_program';
 
 export async function getProgramPaths({
   root,
@@ -37,7 +37,8 @@ export async function getProgramPaths({
   );
 
   if (filePaths.length === 0) {
-    throw Error(`No files found in ${root}`);
+    return []; // Temporarily accept empty directories while https://github.com/elastic/kibana-team/issues/1066 is completed
+    // throw Error(`No files found in ${root}`);
   }
 
   const fullPaths = filePaths
@@ -52,15 +53,8 @@ export async function getProgramPaths({
 }
 
 export function* extractCollectors(fullPaths: string[], tsConfig: any) {
-  const program = ts.createProgram(fullPaths, tsConfig, compilerHost);
-  program.getTypeChecker();
-  const sourceFiles = fullPaths.map((fullPath) => {
-    const sourceFile = program.getSourceFile(fullPath);
-    if (!sourceFile) {
-      throw Error(`Unable to get sourceFile ${fullPath}.`);
-    }
-    return sourceFile;
-  });
+  const program = createKibanaProgram(fullPaths, tsConfig);
+  const sourceFiles = getAllSourceFiles(fullPaths, program);
 
   for (const sourceFile of sourceFiles) {
     yield* parseUsageCollection(sourceFile, program);

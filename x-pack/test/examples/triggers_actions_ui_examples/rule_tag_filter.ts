@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
+import { FtrProviderContext } from '@kbn/test-suites-src/functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -23,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    it('shoud load from shareable lazy loader', async () => {
+    it('should load from shareable lazy loader', async () => {
       await testSubjects.find('ruleTagFilter');
       const exists = await testSubjects.exists('ruleTagFilter');
       expect(exists).to.be(true);

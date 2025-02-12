@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import * as Rx from 'rxjs';
 import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TestLog } from './log';
 import { CliDevMode, SomeCliArgs } from './cli_dev_mode';
@@ -29,18 +30,11 @@ const { Optimizer } = jest.requireMock('./optimizer');
 jest.mock('./dev_server');
 const { DevServer } = jest.requireMock('./dev_server');
 
-jest.mock('./base_path_proxy_server');
-const { BasePathProxyServer } = jest.requireMock('./base_path_proxy_server');
+jest.mock('./base_path_proxy');
+const { getBasePathProxyServer } = jest.requireMock('./base_path_proxy');
 
 jest.mock('@kbn/ci-stats-reporter');
 const { CiStatsReporter } = jest.requireMock('@kbn/ci-stats-reporter');
-
-jest.mock('./get_server_watch_paths', () => ({
-  getServerWatchPaths: jest.fn(() => ({
-    watchPaths: ['<mock watch paths>'],
-    ignorePaths: ['<mock ignore paths>'],
-  })),
-}));
 
 const mockBasePathProxy = {
   targetPort: 9999,
@@ -54,7 +48,7 @@ let log: TestLog;
 beforeEach(() => {
   process.argv = ['node', './script', 'foo', 'bar', 'baz'];
   log = new TestLog();
-  BasePathProxyServer.mockImplementation(() => mockBasePathProxy);
+  getBasePathProxyServer.mockImplementation(() => mockBasePathProxy);
 });
 
 afterEach(() => {
@@ -123,7 +117,6 @@ it('passes correct args to sub-classes', () => {
           "cache": true,
           "dist": true,
           "enabled": true,
-          "oss": true,
           "pluginPaths": Array [],
           "pluginScanDirs": Array [
             <absolute path>/src/plugins,
@@ -142,21 +135,15 @@ it('passes correct args to sub-classes', () => {
     Array [
       Array [
         Object {
-          "cwd": <absolute path>,
           "enabled": true,
-          "ignore": Array [
-            "<mock ignore paths>",
-          ],
           "log": <TestLog>,
-          "paths": Array [
-            "<mock watch paths>",
-          ],
+          "repoRoot": <absolute path>,
         },
       ],
     ]
   `);
 
-  expect(BasePathProxyServer).not.toHaveBeenCalled();
+  expect(getBasePathProxyServer).not.toHaveBeenCalled();
 
   expect(log.messages).toMatchInlineSnapshot(`Array []`);
 });
@@ -177,13 +164,15 @@ it('disables the watcher', () => {
 it('enables the basePath proxy', () => {
   new CliDevMode(createOptions({ cliArgs: { basePath: true } }));
 
-  expect(BasePathProxyServer).toHaveBeenCalledTimes(1);
-  expect(BasePathProxyServer.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(getBasePathProxyServer).toHaveBeenCalledTimes(1);
+  expect(getBasePathProxyServer.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
-      <TestLog>,
-      Object {},
       Object {
-        "basePathProxyTargetPort": 9000,
+        "devConfig": Object {
+          "basePathProxyTargetPort": 9000,
+        },
+        "httpConfig": Object {},
+        "log": <TestLog>,
       },
     ]
   `);

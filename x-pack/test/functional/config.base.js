@@ -5,41 +5,33 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
-
 import { services } from './services';
 import { pageObjects } from './page_objects';
-
-// Docker image to use for Fleet API integration tests.
-// This hash comes from the latest successful build of the Production Distribution of the Package Registry, for
-// example: https://internal-ci.elastic.co/blue/organizations/jenkins/package_storage%2Findexing-job/detail/main/1884/pipeline/147.
-// It should be updated any time there is a new package published.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-src/functional/config.base')
   );
 
   return {
     services,
     pageObjects,
 
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
+
     servers: kibanaFunctionalConfig.get('servers'),
 
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [
-        'path.repo=/tmp/',
-        'xpack.security.authc.api_key.enabled=true',
-        'cluster.routing.allocation.disk.threshold_enabled=true', // make sure disk thresholds are enabled for UA cluster testing
-      ],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -54,7 +46,12 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
-        '--uiSettings.overrides.observability:enableNewSyntheticsView=true', // for OSS test management/_import_objects,
+        '--savedObjects.allowHttpApiAccess=false', // override default to not allow hiddenFromHttpApis saved objects access to the http APIs see https://github.com/elastic/dev/issues/2200
+        // explicitly disable internal API restriction. See https://github.com/elastic/kibana/issues/163654
+        '--server.restrictInternalApis=false',
+        // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
       ],
     },
     uiSettings: {
@@ -148,6 +145,9 @@ export default async function ({ readConfigFile }) {
       snapshotRestore: {
         pathname: '/app/management/data/snapshot_restore',
       },
+      spacesManagement: {
+        pathname: '/app/management/kibana/spaces',
+      },
       remoteClusters: {
         pathname: '/app/management/data/remote_clusters',
       },
@@ -172,12 +172,41 @@ export default async function ({ readConfigFile }) {
       observability: {
         pathname: '/app/observability',
       },
+      observabilityLogsExplorer: {
+        pathname: '/app/observability-logs-explorer',
+      },
       connectors: {
         pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
       },
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+      },
+      obsAIAssistant: {
+        pathname: '/app/observabilityAIAssistant',
+      },
+      aiAssistantManagementSelection: {
+        pathname: '/app/management/kibana/aiAssistantManagementSelection',
+      },
+      obsAIAssistantManagement: {
+        pathname: '/app/management/kibana/observabilityAiAssistantManagement',
+      },
+      enterpriseSearch: {
+        pathname: '/app/elasticsearch/overview',
+      },
+      elasticsearchStart: {
+        pathname: '/app/elasticsearch/start',
+      },
+      elasticsearchIndices: {
+        pathname: '/app/elasticsearch/indices',
+      },
+    },
+
+    suiteTags: {
+      ...kibanaCommonConfig.get('suiteTags'),
+      exclude: [...kibanaCommonConfig.get('suiteTags').exclude, 'upgradeAssistant'],
     },
 
     // choose where screenshots should be saved
@@ -375,7 +404,14 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['*'],
-                privileges: ['create', 'read', 'view_index_metadata', 'monitor', 'create_index'],
+                privileges: [
+                  'create',
+                  'read',
+                  'view_index_metadata',
+                  'monitor',
+                  'create_index',
+                  'manage',
+                ],
               },
             ],
           },
@@ -461,7 +497,7 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             indices: [
               {
-                names: ['rollup-*'],
+                names: ['rollup-*', 'regular-index*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],
@@ -550,9 +586,23 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        read_ilm: {
+          elasticsearch: {
+            cluster: ['read_ilm'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
+        },
+
         index_management_user: {
           elasticsearch: {
-            cluster: ['monitor', 'manage_index_templates'],
+            cluster: ['monitor', 'manage_index_templates', 'manage_enrich'],
             indices: [
               {
                 names: ['*'],
@@ -577,6 +627,13 @@ export default async function ({ readConfigFile }) {
               'manage_slm',
               'cluster:admin/snapshot',
               'cluster:admin/repository',
+              'manage_index_templates',
+            ],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
             ],
           },
           kibana: [
@@ -592,6 +649,20 @@ export default async function ({ readConfigFile }) {
         ingest_pipelines_user: {
           elasticsearch: {
             cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        manage_processors_user: {
+          elasticsearch: {
+            cluster: ['manage'],
           },
           kibana: [
             {
@@ -633,6 +704,45 @@ export default async function ({ readConfigFile }) {
             },
           ],
           elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        slo_all: {
+          kibana: [
+            {
+              feature: {
+                slo: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+        slo_read_only: {
+          kibana: [
+            {
+              feature: {
+                slo: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
             indices: [
               {
                 names: ['*'],

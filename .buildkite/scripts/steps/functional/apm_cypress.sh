@@ -2,20 +2,15 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/steps/functional/common.sh
 
-APM_CYPRESS_RECORD_KEY="$(retry 5 5 vault read -field=CYPRESS_RECORD_KEY secret/kibana-issues/dev/apm-cypress-dashboard-record-key)"
-
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 export JOB=kibana-apm-cypress
 
 echo "--- APM Cypress Tests"
 
-cd "$XPACK_DIR"
+cd "$XPACK_DIR/solutions/observability/plugins/apm/ftr_e2e"
 
-node plugins/apm/scripts/test/e2e.js \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --record \
-  --key "$APM_CYPRESS_RECORD_KEY"
+set +e
+yarn cypress:run; status=$?; yarn junit:merge || :; exit $status

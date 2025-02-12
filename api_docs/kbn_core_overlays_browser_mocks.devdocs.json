@@ -6,29 +6,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-overlays-browser-mocks",
-        "id": "def-server.overlayServiceMock",
+        "id": "def-public.overlayServiceMock",
         "type": "Object",
         "tags": [],
         "label": "overlayServiceMock",
         "description": [],
-        "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+        "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser-mocks",
-            "id": "def-server.overlayServiceMock.create",
+            "id": "def-public.overlayServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -37,16 +29,16 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.PublicMethodsOf",
+                "section": "def-common.PublicMethodsOf",
                 "text": "PublicMethodsOf"
               },
               "<",
               "OverlayService",
               ">>"
             ],
-            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser-mocks",
-            "id": "def-server.overlayServiceMock.createStartContract",
+            "id": "def-public.overlayServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -63,22 +55,16 @@
               "() => ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayStart",
-                "text": "OverlayStart"
-              },
+              "OverlayStart",
               ">"
             ],
-            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -88,6 +74,14 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   },
   "common": {
     "classes": [],

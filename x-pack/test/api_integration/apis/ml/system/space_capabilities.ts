@@ -9,13 +9,13 @@ import expect from '@kbn/expect';
 
 import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';
 
-const NUMBER_OF_CAPABILITIES = 38;
+const NUMBER_OF_CAPABILITIES = 44;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -24,9 +24,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(user: USER, space?: string): Promise<MlCapabilitiesResponse> {
     const { body, status } = await supertest
-      .get(`${space ? `/s/${space}` : ''}/api/ml/ml_capabilities`)
+      .get(`${space ? `/s/${space}` : ''}/internal/ml/ml_capabilities`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(200, status, body);
 
     return body;
@@ -90,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
+          canDeleteForecast: false,
           canCreateDatafeed: false,
           canDeleteDatafeed: false,
           canStartStopDatafeed: false,
@@ -107,6 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
           canUseMlAlerts: true,
           canGetFieldInfo: true,
           canGetMlInfo: true,
+          canUseAiops: true,
           canGetJobs: true,
           canGetDatafeeds: true,
           canGetCalendars: true,
@@ -119,8 +121,12 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: true,
           canTestTrainedModels: true,
           canCreateTrainedModels: false,
+          canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
+          isADEnabled: true,
+          isDFAEnabled: true,
+          isNLPEnabled: true,
         });
       });
 
@@ -134,6 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
+          canDeleteForecast: false,
           canCreateDatafeed: false,
           canDeleteDatafeed: false,
           canStartStopDatafeed: false,
@@ -151,6 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
           canUseMlAlerts: false,
           canGetFieldInfo: false,
           canGetMlInfo: false,
+          canUseAiops: false,
           canGetJobs: false,
           canGetDatafeeds: false,
           canGetCalendars: false,
@@ -163,8 +171,12 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: false,
           canTestTrainedModels: false,
           canCreateTrainedModels: false,
+          canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
+          isADEnabled: true,
+          isDFAEnabled: true,
+          isNLPEnabled: true,
         });
       });
 
@@ -178,6 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: true,
           canUpdateJob: true,
           canForecastJob: true,
+          canDeleteForecast: true,
           canCreateDatafeed: true,
           canDeleteDatafeed: true,
           canStartStopDatafeed: true,
@@ -195,6 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
           canUseMlAlerts: true,
           canGetFieldInfo: true,
           canGetMlInfo: true,
+          canUseAiops: true,
           canGetJobs: true,
           canGetDatafeeds: true,
           canGetCalendars: true,
@@ -207,8 +221,12 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: true,
           canTestTrainedModels: true,
           canCreateTrainedModels: true,
+          canCreateInferenceEndpoint: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
+          isADEnabled: true,
+          isDFAEnabled: true,
+          isNLPEnabled: true,
         });
       });
 
@@ -222,6 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
+          canDeleteForecast: false,
           canCreateDatafeed: false,
           canDeleteDatafeed: false,
           canStartStopDatafeed: false,
@@ -239,6 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
           canUseMlAlerts: false,
           canGetFieldInfo: false,
           canGetMlInfo: false,
+          canUseAiops: false,
           canGetJobs: false,
           canGetDatafeeds: false,
           canGetCalendars: false,
@@ -251,8 +271,12 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: false,
           canTestTrainedModels: false,
           canCreateTrainedModels: false,
+          canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
+          isADEnabled: true,
+          isDFAEnabled: true,
+          isNLPEnabled: true,
         });
       });
     });

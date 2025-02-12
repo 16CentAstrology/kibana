@@ -14,7 +14,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover']);
+  const PageObjects = getPageObjects(['discover', 'header']);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const browser = getService('browser');
@@ -22,7 +22,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
   type RandomSamplerOption =
     | 'dvRandomSamplerOptionOnAutomatic'
     | 'dvRandomSamplerOptionOnManual'
-    | 'dvRandomSamplerOptionOff';
+    | 'dvRandomSamplerOptionOff'
+    | 'none';
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -44,9 +45,12 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       randomSamplerOption: RandomSamplerOption = 'dvRandomSamplerOptionOff'
     ) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerButtonUseFullData');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
-        await this.setRandomSamplingOption(randomSamplerOption);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        if (randomSamplerOption !== 'none') {
+          await this.setRandomSamplingOption(randomSamplerOption);
+        }
         await await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
       });
     },
@@ -135,7 +139,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertDataVisualizerTableExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`dataVisualizerTable`);
+        await testSubjects.existOrFail(`~dataVisualizerTable-loaded`);
       });
     },
 
@@ -258,7 +262,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         if (expectedOption === 'dvRandomSamplerOptionOff') {
           await testSubjects.existOrFail('dvRandomSamplerOptionOff', { timeout: 1000 });
           await testSubjects.missingOrFail('dvRandomSamplerProbabilityRange', { timeout: 1000 });
-          await testSubjects.missingOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+          await testSubjects.missingOrFail('dvRandomSamplerProbabilityUsedMsg', {
             timeout: 1000,
           });
         }
@@ -280,13 +284,13 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
         if (expectedOption === 'dvRandomSamplerOptionOnAutomatic') {
           await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic', { timeout: 1000 });
-          await testSubjects.existOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+          await testSubjects.existOrFail('dvRandomSamplerProbabilityUsedMsg', {
             timeout: 1000,
           });
 
           if (expectedProbability !== undefined) {
             const probabilityText = await testSubjects.getVisibleText(
-              'dvRandomSamplerAutomaticProbabilityMsg'
+              'dvRandomSamplerProbabilityUsedMsg'
             );
             expect(probabilityText).to.contain(
               `${expectedProbability}`,

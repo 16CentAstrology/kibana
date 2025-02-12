@@ -8,7 +8,11 @@
       "active": true,
       "policy_id": "policy1",
       "type": "PERMANENT",
-      "local_metadata": { "host": {"hostname": "host1"}},
+      "local_metadata": { "host": {"hostname": "host1"}, "elastic": {
+        "agent": {
+          "version": "8.7.0"
+        }
+      }},
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:14:25Z",
       "last_checkin": "2022-06-27T12:26:29Z",
@@ -106,25 +110,8 @@
 {
   "type": "doc",
   "value": {
-    "id": "fleet-agent-actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-actions",
-      "fleet-agent-actions": {
-        "agent_id": "agent1",
-        "type": "PAUSE",
-        "created_at": "2019-09-04T15:01:07+0000",
-        "sent_at": "2019-09-04T15:03:07+0000"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "ingest-agent-policies:policy1",
-    "index": ".kibana",
+    "index": ".kibana_ingest",
     "source": {
       "type": "ingest-agent-policies",
       "ingest-agent-policies": {
@@ -132,7 +119,6 @@
         "namespace": "default",
         "description": "Policy 1",
         "status": "active",
-        "package_policies": [],
         "is_default": true,
         "monitoring_enabled": [
           "logs",
@@ -141,9 +127,6 @@
         "revision": 2,
         "updated_at": "2020-05-07T19:34:42.533Z",
         "updated_by": "system"
-      },
-      "migrationVersion": {
-        "ingest-agent-policies": "7.10.0"
       }
     }
   }
@@ -153,7 +136,7 @@
   "type": "doc",
   "value": {
     "id": "ingest-agent-policies:policy2",
-    "index": ".kibana",
+    "index": ".kibana_ingest",
     "source": {
       "type": "ingest-agent-policies",
       "ingest-agent-policies": {
@@ -161,7 +144,6 @@
         "namespace": "default",
         "description": "Policy 2",
         "status": "active",
-        "package_policies": [],
         "is_default": true,
         "monitoring_enabled": [
           "logs",
@@ -170,9 +152,6 @@
         "revision": 2,
         "updated_at": "2020-05-07T19:34:42.533Z",
         "updated_by": "system"
-      },
-      "migrationVersion": {
-        "ingest-agent-policies": "7.10.0"
       }
     }
   }

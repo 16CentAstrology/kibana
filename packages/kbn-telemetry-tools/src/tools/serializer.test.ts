@@ -1,43 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as ts from 'typescript';
-import * as path from 'path';
+import ts from 'typescript';
 import { getDescriptor, TelemetryKinds } from './serializer';
 import { traverseNodes } from './ts_parser';
-import { compilerHost } from './compiler_host';
-
-export function loadFixtureProgram(fixtureName: string) {
-  const fixturePath = path.resolve(
-    process.cwd(),
-    'src',
-    'fixtures',
-    'telemetry_collectors',
-    `${fixtureName}.ts`
-  );
-  const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
-  if (!tsConfig) {
-    throw new Error('Could not find a valid tsconfig.json.');
-  }
-  const program = ts.createProgram([fixturePath], tsConfig as any, compilerHost);
-  const checker = program.getTypeChecker();
-  const sourceFile = program.getSourceFile(fixturePath);
-  if (!sourceFile) {
-    throw Error('sourceFile is undefined!');
-  }
-  return { program, checker, sourceFile };
-}
+import { loadFixtureProgram } from './test_utils';
 
 describe('getDescriptor', () => {
   const usageInterfaces = new Map<string, ts.InterfaceDeclaration | ts.TypeAliasDeclaration>();
   let tsProgram: ts.Program;
   beforeAll(() => {
-    const { program, sourceFile } = loadFixtureProgram('constants');
+    const { program, sourceFile } = loadFixtureProgram('telemetry_collectors/constants.ts');
     tsProgram = program;
     for (const node of traverseNodes(sourceFile)) {
       if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
@@ -125,6 +104,13 @@ describe('getDescriptor', () => {
       },
       mappedTypeWithOneInlineProp: {
         prop3: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      },
+      mappedTypeWithLiteralTemplates: {
+        prop1: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+        prop2: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+        // ideally, it'd be `templated_prop/@@INDEX@@` to be more explicit. But we're going with the fuzzier approach
+        // for now as it may require more changes downstream that are not worth it.
+        '@@INDEX@@': { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
       },
     });
   });

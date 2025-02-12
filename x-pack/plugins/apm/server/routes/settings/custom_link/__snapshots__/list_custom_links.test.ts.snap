@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`List Custom Links fetches all custom links 1`] = `undefined`;
-
-exports[`List Custom Links filters custom links 1`] = `undefined`;

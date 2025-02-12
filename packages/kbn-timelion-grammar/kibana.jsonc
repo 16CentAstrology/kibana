@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/timelion-grammar",
-  "owner": "@elastic/kibana-visualizations",
-  "runtimeDeps": [],
-  "typeDeps": []
-}

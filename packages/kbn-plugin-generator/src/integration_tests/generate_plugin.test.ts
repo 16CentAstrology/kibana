@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
 import del from 'del';
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import globby from 'globby';
 
@@ -92,6 +93,7 @@ it('generates a plugin without UI', async () => {
       <absolute path>/plugins/bar/server/plugin.ts,
       <absolute path>/plugins/bar/server/routes/index.ts,
       <absolute path>/plugins/bar/server/types.ts,
+      <absolute path>/plugins/bar/translations/ja-JP.json,
       <absolute path>/plugins/bar/tsconfig.json,
     ]
   `);

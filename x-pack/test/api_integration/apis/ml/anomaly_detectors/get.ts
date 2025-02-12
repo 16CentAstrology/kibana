@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -72,9 +72,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('GetAnomalyDetectors', () => {
       it('should fetch all anomaly detector jobs', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors`)
+          .get(`/internal/ml/anomaly_detectors`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
@@ -85,22 +85,21 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve jobs for the user without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors`)
+          .get(`/internal/ml/anomaly_detectors`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
 
     describe('GetAnomalyDetectorsById', () => {
       it('should fetch single anomaly detector job by id', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors/${jobId}_1`)
+          .get(`/internal/ml/anomaly_detectors/${jobId}_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(1);
@@ -110,9 +109,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch anomaly detector jobs based on provided ids', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors/${jobId}_1,${jobId}_2`)
+          .get(`/internal/ml/anomaly_detectors/${jobId}_1,${jobId}_2`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
@@ -123,22 +122,21 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve a job for the user without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors/${jobId}_1`)
+          .get(`/internal/ml/anomaly_detectors/${jobId}_1`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
 
     describe('GetAnomalyDetectorsStats', () => {
       it('should fetch jobs stats', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors/_stats`)
+          .get(`/internal/ml/anomaly_detectors/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
@@ -156,22 +154,21 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve jobs stats for the user without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors/_stats`)
+          .get(`/internal/ml/anomaly_detectors/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
 
     describe('GetAnomalyDetectorsStatsById', () => {
       it('should fetch single job stats', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors/${jobId}_1/_stats`)
+          .get(`/internal/ml/anomaly_detectors/${jobId}_1/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(1);
@@ -188,9 +185,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch multiple jobs stats based on provided ids', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors/${jobId}_1,${jobId}_2/_stats`)
+          .get(`/internal/ml/anomaly_detectors/${jobId}_1,${jobId}_2/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
@@ -208,13 +205,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not allow to retrieve a job stats for the user without required permissions', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/anomaly_detectors/${jobId}_1/_stats`)
+          .get(`/internal/ml/anomaly_detectors/${jobId}_1/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
   });

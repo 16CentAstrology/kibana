@@ -1,31 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
-import fs from 'fs';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
-  );
-
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./test_suites/usage_collection'),
       require.resolve('./test_suites/telemetry'),
       require.resolve('./test_suites/core'),
       require.resolve('./test_suites/custom_visualizations'),
+      require.resolve('./test_suites/hardening'),
       require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/core_plugins'),
       require.resolve('./test_suites/management'),
@@ -33,6 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/data_plugin'),
       require.resolve('./test_suites/saved_objects_management'),
       require.resolve('./test_suites/saved_objects_hidden_type'),
+      require.resolve('./test_suites/shared_ux'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -60,19 +58,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--corePluginDeprecations.noLongerUsed=still_using',
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
+        // We want to test when the banner is shown
+        '--telemetry.banner=true',
         // explicitly enable the cloud integration plugins to validate the rendered config keys
-        '--xpack.cloud_integrations.chat.enabled=true',
-        '--xpack.cloud_integrations.chat.chatURL=a_string',
         '--xpack.cloud_integrations.experiments.enabled=true',
         '--xpack.cloud_integrations.experiments.launch_darkly.sdk_key=a_string',
         '--xpack.cloud_integrations.experiments.launch_darkly.client_id=a_string',
         '--xpack.cloud_integrations.full_story.enabled=true',
         '--xpack.cloud_integrations.full_story.org_id=a_string',
-        '--xpack.cloud_integrations.gain_sight.enabled=true',
-        '--xpack.cloud_integrations.gain_sight.org_id=a_string',
-        ...plugins.map(
-          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
-        ),
+        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },
   };

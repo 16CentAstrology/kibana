@@ -10,10 +10,96 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/yarn-lock-validator",
-        "id": "def-server.readYarnLock",
+        "id": "def-common.findProductionDependencies",
+        "type": "Function",
+        "tags": [],
+        "label": "findProductionDependencies",
+        "description": [
+          "\nGet a list of the all production dependencies for Kibana by starting with the\ndependencies listed in package.json and then traversing deeply into the transitive\ndependencies as declared by the yarn.lock file."
+        ],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/some-dev-log",
+            "scope": "common",
+            "docId": "kibKbnSomeDevLogPluginApi",
+            "section": "def-common.SomeDevLog",
+            "text": "SomeDevLog"
+          },
+          ", yarnLock: ",
+          {
+            "pluginId": "@kbn/yarn-lock-validator",
+            "scope": "common",
+            "docId": "kibKbnYarnLockValidatorPluginApi",
+            "section": "def-common.YarnLock",
+            "text": "YarnLock"
+          },
+          ") => Map<string, { name: string; version: string; }>"
+        ],
+        "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yarn-lock-validator",
+            "id": "def-common.findProductionDependencies.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/some-dev-log",
+                "scope": "common",
+                "docId": "kibKbnSomeDevLogPluginApi",
+                "section": "def-common.SomeDevLog",
+                "text": "SomeDevLog"
+              }
+            ],
+            "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/yarn-lock-validator",
+            "id": "def-common.findProductionDependencies.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "yarnLock",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/yarn-lock-validator",
+                "scope": "common",
+                "docId": "kibKbnYarnLockValidatorPluginApi",
+                "section": "def-common.YarnLock",
+                "text": "YarnLock"
+              }
+            ],
+            "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/yarn-lock-validator",
+        "id": "def-common.readYarnLock",
         "type": "Function",
         "tags": [],
         "label": "readYarnLock",
@@ -24,9 +110,9 @@
           "() => Promise<",
           {
             "pluginId": "@kbn/yarn-lock-validator",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnYarnLockValidatorPluginApi",
-            "section": "def-server.YarnLock",
+            "section": "def-common.YarnLock",
             "text": "YarnLock"
           },
           ">"
@@ -40,7 +126,7 @@
       },
       {
         "parentPluginId": "@kbn/yarn-lock-validator",
-        "id": "def-server.validateDependencies",
+        "id": "def-common.validateDependencies",
         "type": "Function",
         "tags": [],
         "label": "validateDependencies",
@@ -51,17 +137,17 @@
           "(log: ",
           {
             "pluginId": "@kbn/some-dev-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSomeDevLogPluginApi",
-            "section": "def-server.SomeDevLog",
+            "section": "def-common.SomeDevLog",
             "text": "SomeDevLog"
           },
           ", yarnLock: ",
           {
             "pluginId": "@kbn/yarn-lock-validator",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnYarnLockValidatorPluginApi",
-            "section": "def-server.YarnLock",
+            "section": "def-common.YarnLock",
             "text": "YarnLock"
           },
           ") => Promise<void>"
@@ -72,7 +158,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/yarn-lock-validator",
-            "id": "def-server.validateDependencies.$1",
+            "id": "def-common.validateDependencies.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -80,9 +166,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/some-dev-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnSomeDevLogPluginApi",
-                "section": "def-server.SomeDevLog",
+                "section": "def-common.SomeDevLog",
                 "text": "SomeDevLog"
               }
             ],
@@ -93,7 +179,7 @@
           },
           {
             "parentPluginId": "@kbn/yarn-lock-validator",
-            "id": "def-server.validateDependencies.$2",
+            "id": "def-common.validateDependencies.$2",
             "type": "Object",
             "tags": [],
             "label": "yarnLock",
@@ -101,9 +187,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/yarn-lock-validator",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnYarnLockValidatorPluginApi",
-                "section": "def-server.YarnLock",
+                "section": "def-common.YarnLock",
                 "text": "YarnLock"
               }
             ],
@@ -120,7 +206,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/yarn-lock-validator",
-        "id": "def-server.YarnLock",
+        "id": "def-common.YarnLock",
         "type": "Interface",
         "tags": [],
         "label": "YarnLock",
@@ -133,7 +219,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/yarn-lock-validator",
-            "id": "def-server.YarnLock.Unnamed",
+            "id": "def-common.YarnLock.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: { version: string; resolved: string; integrity: string; dependencies?: { [key: string]: string; } | undefined; optionalDependencies?: { [key: string]: string; } | undefined; }",
@@ -151,14 +237,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

@@ -17,8 +17,8 @@ export default function (ftrContext: FtrProviderContext) {
 
   const scenario = createScenario(ftrContext);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/110938
-  describe.skip('changes in license types', () => {
+  describe('changes in license types', function () {
+    this.tags('skipFIPS');
     after(async () => {
       await scenario.teardown();
     });
@@ -66,7 +66,9 @@ export default function (ftrContext: FtrProviderContext) {
       await testSubjects.missingOrFail('licenseExpiredBanner');
     });
 
-    it('properly recognize an enterprise license', async () => {
+    // FIXME: enterprise license is not available for tests
+    // https://github.com/elastic/kibana/issues/53575
+    it.skip('properly recognize an enterprise license', async () => {
       await scenario.startEnterprise();
       await scenario.waitForPluginToDetectLicenseUpdate();
 

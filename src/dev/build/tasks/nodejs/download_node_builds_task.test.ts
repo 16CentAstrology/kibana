@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
@@ -36,18 +37,26 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    targetServerlessPlatforms: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 
   getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {
-    return {
-      url: `${platform.getName()}:url`,
-      downloadPath: `${platform.getName()}:downloadPath`,
-      downloadName: `${platform.getName()}:downloadName`,
-    };
+    return [
+      {
+        url: `${platform.getName()}:url`,
+        downloadPath: `${platform.getName()}:downloadPath`,
+        downloadName: `${platform.getName()}:downloadName`,
+      },
+    ];
   });
 
   getNodeShasums.mockReturnValue({
@@ -80,26 +89,6 @@ it('downloads node builds for each platform', async () => {
           "shaAlgorithm": "sha256",
           "shaChecksum": "linux:sha256",
           "url": "linux:url",
-        },
-      ],
-      Array [
-        Object {
-          "destination": "linux:downloadPath",
-          "log": <ToolingLog>,
-          "maxAttempts": 3,
-          "shaAlgorithm": "sha256",
-          "shaChecksum": "linux:sha256",
-          "url": "linux:url",
-        },
-      ],
-      Array [
-        Object {
-          "destination": "darwin:downloadPath",
-          "log": <ToolingLog>,
-          "maxAttempts": 3,
-          "shaAlgorithm": "sha256",
-          "shaChecksum": "darwin:sha256",
-          "url": "darwin:url",
         },
       ],
       Array [

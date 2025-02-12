@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import 'source-map-support/register';
 
 import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
-import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, mapTo, takeUntil } from 'rxjs';
 import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
 
-import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, BundleRefs } from '../common';
+import {
+  CompilerMsgs,
+  CompilerMsg,
+  maybeMap,
+  Bundle,
+  WorkerConfig,
+  BundleRemotes,
+} from '../common';
 import { getWebpackConfig } from './webpack.config';
 
 const PLUGIN_NAME = '@kbn/optimizer';
@@ -97,10 +105,10 @@ const observeCompiler = (
 export const runCompilers = (
   workerConfig: WorkerConfig,
   bundles: Bundle[],
-  bundleRefs: BundleRefs
+  bundleRemotes: BundleRemotes
 ) => {
   const multiCompiler = webpack(
-    bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
+    bundles.map((def) => getWebpackConfig(def, bundleRemotes, workerConfig))
   );
 
   return Rx.merge(

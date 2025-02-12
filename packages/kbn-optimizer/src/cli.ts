@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { lastValueFrom } from 'rxjs';
 import { run, Flags } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -92,13 +93,6 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         throw createFlagError('expected --workers to be a number greater than 0');
       }
 
-      const extraPluginScanDirs = ([] as string[])
-        .concat((flags['scan-dir'] as string | string[]) || [])
-        .map((p) => Path.resolve(p));
-      if (!extraPluginScanDirs.every((s) => typeof s === 'string')) {
-        throw createFlagError('expected --scan-dir to be a string');
-      }
-
       const reportStats = flags['report-stats'] ?? false;
       if (typeof reportStats !== 'boolean') {
         throw createFlagError('expected --report-stats to have no value');
@@ -135,13 +129,11 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         repoRoot: REPO_ROOT,
         watch,
         maxWorkerCount,
-        oss: oss && !(validateLimits || updateLimits),
         dist: dist || updateLimits,
         cache,
         examples: examples && !(validateLimits || updateLimits),
         testPlugins: testPlugins && !(validateLimits || updateLimits),
         profileWebpack,
-        extraPluginScanDirs,
         inspectWorkers,
         includeCoreBundle,
         filter,

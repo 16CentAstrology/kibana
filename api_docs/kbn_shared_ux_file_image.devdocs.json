@@ -39,9 +39,9 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +61,7 @@
                 "text": "Props"
               }
             ],
-            "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -83,11 +83,17 @@
         "description": [],
         "signature": [
           "{ meta?: ",
-          "FileImageMetadata",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileImageMetadata",
+            "text": "FileImageMetadata"
+          },
           " | undefined; } & ",
           "EuiImageProps"
         ],
-        "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

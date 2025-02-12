@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as path from 'path';
 import { extractCollectors, getProgramPaths } from './extract_collectors';
 import { parseTelemetryRC } from './config';
@@ -14,7 +15,7 @@ import { allExtractedCollectors } from './__fixture__/all_extracted_collectors';
 
 describe('extractCollectors', () => {
   it('extracts collectors given rc file', async () => {
-    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
+    const configRoot = path.resolve(__dirname, '__fixture__', 'telemetry_collectors');
     const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
     if (!tsConfig) {
       throw new Error('Could not find a valid tsconfig.json.');

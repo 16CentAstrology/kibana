@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const { USES_STYLED_COMPONENTS } = require('./styled_components_files');
 
-module.exports = (_, options = {}) => {
+/** @type {import('@babel/core').ConfigFunction} */
+module.exports = (api, options = {}) => {
   return {
     presets: [
       [
@@ -18,8 +20,9 @@ module.exports = (_, options = {}) => {
           modules: false,
           // Please read the explanation for this
           // in node_preset.js
-          corejs: '3.26.1',
+          corejs: '3.37.1',
           bugfixes: true,
+          browserslistEnv: api.env('production') ? 'production' : 'dev',
         },
       ],
       [require('./common_preset'), options],

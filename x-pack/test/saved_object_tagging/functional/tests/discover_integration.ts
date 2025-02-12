@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'discover',
   ]);
+  const retry = getService('retry');
 
   /**
    * Select tags in the searchbar's tag filter.
@@ -47,6 +48,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const searchTitles = await Promise.all(
         searchTitleWrappers.map((entry) => entry.getVisibleText())
       );
+      searchTitles.sort();
+      savedSearchTitles.sort();
       expect(searchTitles).to.eql(savedSearchTitles);
     });
   };
@@ -79,22 +82,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to manually type tag filter query', async () => {
         await PageObjects.discover.openLoadSavedSearchPanel();
         await testSubjects.setValue('savedObjectFinderSearchInput', 'tag:(tag-1)');
-        await expectSavedSearches('A Saved Search');
+        await expectSavedSearches('A Saved Search\nA Saved Search Description');
       });
 
       it('allows to filter by selecting a tag in the filter menu', async () => {
         await PageObjects.discover.openLoadSavedSearchPanel();
         await selectFilterTags('tag-2');
-        await expectSavedSearches('A Saved Search', 'A Different Saved Search');
+        await expectSavedSearches(
+          'A Saved Search\nA Saved Search Description',
+          'A Different Saved Search\nA Different Saved Search Description'
+        );
       });
 
       it('allows to filter by multiple tags', async () => {
         await PageObjects.discover.openLoadSavedSearchPanel();
         await selectFilterTags('tag-2', 'tag-3');
         await expectSavedSearches(
-          'A Saved Search',
-          'A Different Saved Search',
-          'A Third Saved Search'
+          'A Different Saved Search\nA Different Saved Search Description',
+          'A Saved Search\nA Saved Search Description',
+          'A Third Saved Search\nAn Untagged Saved Search Description'
         );
       });
     });
@@ -113,11 +119,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await PageObjects.discover.openLoadSavedSearchPanel();
         await selectFilterTags('tag-1', 'tag-2');
-        await expectSavedSearches('A Saved Search', 'A Different Saved Search', 'My New Search');
+        await expectSavedSearches(
+          'A Different Saved Search\nA Different Saved Search Description',
+          'A Saved Search\nA Saved Search Description',
+          'My New Search'
+        );
       });
 
       it('allows to create a tag from the tag selector', async () => {
         await PageObjects.discover.clickSaveSearchButton();
+        const searchName = 'search-with-new-tag';
+        // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
+        await retry.waitFor(
+          `saved search title is set to ${searchName} and save button is clickable`,
+          async () => {
+            const saveButton = await testSubjects.find('confirmSaveSavedObjectButton');
+            await testSubjects.setValue('savedObjectTitle', searchName);
+            return (await saveButton.getAttribute('disabled')) !== 'true';
+          }
+        );
         await testSubjects.setValue('savedObjectTitle', 'search-with-new-tag');
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);
@@ -131,6 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
           {
             submit: true,
+            clearWithKeyboard: true,
           }
         );
         expect(await tagModal.isOpened()).to.be(false);
@@ -158,9 +179,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.discover.openLoadSavedSearchPanel();
         await selectFilterTags('tag-3');
         await expectSavedSearches(
-          'A Different Saved Search',
-          'A Third Saved Search',
-          'A Saved Search'
+          'A Different Saved Search\nA Different Saved Search Description',
+          'A Saved Search\nA Saved Search Description',
+          'A Third Saved Search\nAn Untagged Saved Search Description'
         );
       });
     });

@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/repo-packages');
+jest.mock('@kbn/core-ui-settings-common');
 jest.mock('./assign_bundles_to_workers');
 jest.mock('./kibana_platform_plugins');
 jest.mock('./get_plugin_bundles');
-jest.mock('../common/theme_tags');
 jest.mock('./filter_by_id');
 jest.mock('./focus_bundles');
 jest.mock('../limits');
@@ -23,12 +25,11 @@ jest.mock('os', () => {
   };
 });
 
-import Path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';
-import { parseThemeTags } from '../common';
+import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -44,33 +45,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(() =>
       OptimizerConfig.parseOptions({ repoRoot: 'foo/bar' })
     ).toThrowErrorMatchingInlineSnapshot(`"repoRoot must be an absolute path"`);
-  });
-
-  it('validates that pluginScanDirs are absolute', () => {
-    expect(() =>
-      OptimizerConfig.parseOptions({
-        repoRoot: REPO_ROOT,
-        pluginScanDirs: ['foo/bar'],
-      })
-    ).toThrowErrorMatchingInlineSnapshot(`"pluginScanDirs must all be absolute paths"`);
-  });
-
-  it('validates that pluginPaths are absolute', () => {
-    expect(() =>
-      OptimizerConfig.parseOptions({
-        repoRoot: REPO_ROOT,
-        pluginPaths: ['foo/bar'],
-      })
-    ).toThrowErrorMatchingInlineSnapshot(`"pluginPaths must all be absolute paths"`);
-  });
-
-  it('validates that extraPluginScanDirs are absolute', () => {
-    expect(() =>
-      OptimizerConfig.parseOptions({
-        repoRoot: REPO_ROOT,
-        extraPluginScanDirs: ['foo/bar'],
-      })
-    ).toThrowErrorMatchingInlineSnapshot(`"extraPluginScanDirs must all be absolute paths"`);
   });
 
   it('validates that maxWorkerCount is a number', () => {
@@ -117,14 +91,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [
-          <absolute path>/src/plugins,
-          <absolute path>/x-pack/plugins,
-          <absolute path>/plugins,
-          <absolute path>-extra,
-        ],
+        "pluginSelector": Object {
+          "examples": false,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -146,14 +120,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [
-          <absolute path>/src/plugins,
-          <absolute path>/x-pack/plugins,
-          <absolute path>/plugins,
-          <absolute path>-extra,
-        ],
+        "pluginSelector": Object {
+          "examples": false,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -175,16 +149,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [
-          <absolute path>/src/plugins,
-          <absolute path>/x-pack/plugins,
-          <absolute path>/plugins,
-          <absolute path>/examples,
-          <absolute path>/x-pack/examples,
-          <absolute path>-extra,
-        ],
+        "pluginSelector": Object {
+          "examples": true,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -194,7 +166,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        oss: true,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -206,40 +177,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [
-          <absolute path>/src/plugins,
-          <absolute path>/plugins,
-          <absolute path>-extra,
-        ],
+        "pluginSelector": Object {
+          "examples": false,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
-        "repoRoot": <absolute path>,
-        "themeTags": undefined,
-        "watch": false,
-      }
-    `);
-
-    expect(
-      OptimizerConfig.parseOptions({
-        repoRoot: REPO_ROOT,
-        pluginScanDirs: [Path.resolve(REPO_ROOT, 'x/y/z'), '/outside/of/repo'],
-      })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "cache": true,
-        "dist": false,
-        "filters": Array [],
-        "focus": Array [],
-        "includeCoreBundle": false,
-        "inspectWorkers": false,
-        "maxWorkerCount": 2,
-        "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [
-          <absolute path>/x/y/z,
-          "/outside/of/repo",
-        ],
-        "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -250,7 +195,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        pluginScanDirs: [],
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -262,9 +206,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [],
+        "pluginSelector": Object {
+          "examples": false,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -275,7 +224,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        pluginScanDirs: [],
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -287,9 +235,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [],
+        "pluginSelector": Object {
+          "examples": false,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -300,7 +253,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        pluginScanDirs: [],
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -312,9 +264,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [],
+        "pluginSelector": Object {
+          "examples": false,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -325,7 +282,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        pluginScanDirs: [],
         cache: true,
       })
     ).toMatchInlineSnapshot(`
@@ -338,9 +294,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [],
+        "pluginSelector": Object {
+          "examples": false,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -351,7 +312,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        pluginScanDirs: [],
         cache: true,
       })
     ).toMatchInlineSnapshot(`
@@ -364,9 +324,14 @@ describe('OptimizerConfig::parseOptions()', () => {
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
-        "pluginPaths": Array [],
-        "pluginScanDirs": Array [],
+        "pluginSelector": Object {
+          "examples": false,
+          "parentDirs": undefined,
+          "paths": undefined,
+          "testPlugins": false,
+        },
         "profileWebpack": false,
+        "reactVersion": "17",
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -384,9 +349,12 @@ describe('OptimizerConfig::create()', () => {
   const assignBundlesToWorkers: jest.Mock = jest.requireMock(
     './assign_bundles_to_workers'
   ).assignBundlesToWorkers;
-  const findKibanaPlatformPlugins: jest.Mock = jest.requireMock(
+  const getPackages: jest.Mock = jest.requireMock('@kbn/repo-packages').getPackages;
+  const getPluginPackagesFilter: jest.Mock =
+    jest.requireMock('@kbn/repo-packages').getPluginPackagesFilter;
+  const toKibanaPlatformPlugin: jest.Mock = jest.requireMock(
     './kibana_platform_plugins'
-  ).findKibanaPlatformPlugins;
+  ).toKibanaPlatformPlugin;
   const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles').getPluginBundles;
   const filterById: jest.Mock = jest.requireMock('./filter_by_id').filterById;
   const focusBundles: jest.Mock = jest.requireMock('./focus_bundles').focusBundles;
@@ -401,7 +369,9 @@ describe('OptimizerConfig::create()', () => {
       { config: Symbol('worker config 1') },
       { config: Symbol('worker config 2') },
     ]);
-    findKibanaPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
+    getPackages.mockReturnValue([Symbol('plugin1'), Symbol('plugin2')]);
+    getPluginPackagesFilter.mockReturnValue(() => true);
+    toKibanaPlatformPlugin.mockImplementation((_, pkg) => pkg);
     getPluginBundles.mockReturnValue([Symbol('bundle1'), Symbol('bundle2')]);
     filterById.mockReturnValue(Symbol('filtered bundles'));
     focusBundles.mockReturnValue(Symbol('focused bundles'));
@@ -414,8 +384,6 @@ describe('OptimizerConfig::create()', () => {
         cache: Symbol('parsed cache'),
         dist: Symbol('parsed dist'),
         maxWorkerCount: Symbol('parsed max worker count'),
-        pluginPaths: Symbol('parsed plugin paths'),
-        pluginScanDirs: Symbol('parsed plugin scan dirs'),
         repoRoot: Symbol('parsed repo root'),
         outputRoot: Symbol('parsed output root'),
         watch: Symbol('parsed watch'),
@@ -425,6 +393,8 @@ describe('OptimizerConfig::create()', () => {
         filters: [],
         focus: [],
         includeCoreBundle: false,
+        pluginSelector: Symbol('plugin selector'),
+        reactVersion: 17,
       })
     );
   });
@@ -443,21 +413,16 @@ describe('OptimizerConfig::create()', () => {
         "filteredBundles": Symbol(filtered bundles),
         "inspectWorkers": Symbol(parsed inspect workers),
         "maxWorkerCount": Symbol(parsed max worker count),
-        "plugins": Symbol(new platform plugins),
+        "plugins": Array [
+          Symbol(plugin1),
+          Symbol(plugin2),
+        ],
         "profileWebpack": Symbol(parsed profile webpack),
+        "reactVersion": 17,
         "repoRoot": Symbol(parsed repo root),
         "themeTags": Symbol(theme tags),
         "watch": Symbol(parsed watch),
       }
-    `);
-
-    expect(findKibanaPlatformPlugins.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Symbol(parsed plugin scan dirs),
-          Symbol(parsed plugin paths),
-        ],
-      ]
     `);
 
     expect(filterById.mock.calls).toMatchInlineSnapshot(`
@@ -472,7 +437,10 @@ describe('OptimizerConfig::create()', () => {
     expect(getPluginBundles.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          Symbol(new platform plugins),
+          Array [
+            Symbol(plugin1),
+            Symbol(plugin2),
+          ],
           Symbol(parsed repo root),
           Symbol(parsed output root),
           Symbol(limits),

@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DebugState } from '@elastic/charts';
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 declare global {
   interface Window {
@@ -40,10 +41,11 @@ export class ElasticChartService extends FtrService {
     return await this.find.existsByCssSelector('.echChart canvas:last-of-type');
   }
 
-  public async waitForRenderComplete(dataTestSubj?: string) {
-    const chart = await this.getChart(dataTestSubj);
+  public async waitForRenderComplete(dataTestSubj?: string, timeout?: number) {
+    const chart = await this.getChart(dataTestSubj, timeout);
     const rendered = await chart.findAllByCssSelector(
-      '.echChartStatus[data-ech-render-complete=true]'
+      '.echChartStatus[data-ech-render-complete=true]',
+      timeout
     );
     expect(rendered.length).to.equal(1);
   }
@@ -111,17 +113,31 @@ export class ElasticChartService extends FtrService {
     dataTestSubj?: string,
     match: number = 0,
     timeout: number | undefined = undefined
-  ): Promise<DebugState | null> {
+  ): Promise<DebugState> {
     const chart = await this.getChart(dataTestSubj, timeout, match);
 
-    try {
-      const visContainer = await chart.findByCssSelector('.echChartStatus');
-      const debugDataString: string | undefined = await visContainer.getAttribute(
-        'data-ech-debug-state'
+    return await this.getChartDebugDataFromChart(chart);
+  }
+
+  /**
+   * used to get chart data from `@elastic/charts`
+   * requires `window._echDebugStateFlag` to be true
+   */
+  public async getChartDebugDataFromChart(chart: WebElementWrapper): Promise<DebugState> {
+    const visContainer = await chart.findByCssSelector('.echChartStatus');
+    const debugDataString = await visContainer.getAttribute('data-ech-debug-state');
+    this.log.debug('data-ech-debug-state: ', debugDataString);
+
+    if (!debugDataString) {
+      throw Error(
+        `Elastic charts debugState not found, ensure 'setNewChartUiDebugFlag' is called before DOM rendering starts.`
       );
-      return debugDataString ? JSON.parse(debugDataString) : null;
+    }
+
+    try {
+      return JSON.parse(debugDataString);
     } catch (error) {
-      throw Error('Elastic charts debugState not found');
+      throw Error('Unable to parse Elastic charts debugState');
     }
   }
 

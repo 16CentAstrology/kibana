@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
   const kibanaServer = getService('kibanaServer');
@@ -31,9 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await ml.dashboardEmbeddables.assertDashboardPanelExists(selectedPanelTitle);
 
     await setFarequoteTimerange();
-
-    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-    await dashboardPanelActions.openContextMenuMorePanel(header);
   }
 
   describe('create jobs from lens', function () {
@@ -55,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     afterEach(async () => {
@@ -70,9 +66,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
@@ -102,9 +98,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 

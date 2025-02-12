@@ -28,12 +28,15 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           .sort()
       ).to.eql(
         [
+          '.d3security',
           '.email',
           '.index',
+          '.inference',
           '.pagerduty',
           '.swimlane',
           '.server-log',
           '.slack',
+          '.slack_api',
           '.webhook',
           '.cases-webhook',
           '.xmatters',
@@ -41,10 +44,20 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.servicenow-sir',
           '.servicenow-itom',
           '.jira',
+          '.observability-ai-assistant',
           '.resilient',
           '.teams',
+          '.thehive',
           '.tines',
+          '.torq',
           '.opsgenie',
+          '.gen-ai',
+          '.bedrock',
+          '.gemini',
+          '.sentinelone',
+          '.cases',
+          '.crowdstrike',
+          '.microsoft_defender_endpoint',
         ].sort()
       );
     });

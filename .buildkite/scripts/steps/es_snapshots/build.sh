@@ -34,13 +34,13 @@ export JENKINS_URL=""
 export BUILD_URL=""
 export JOB_NAME=""
 export NODE_NAME=""
-export DOCKER_BUILDKIT=""
 
 # Reads the ES_BUILD_JAVA env var out of .ci/java-versions.properties and exports it
 export "$(grep '^ES_BUILD_JAVA' .ci/java-versions.properties | xargs)"
 
 export PATH="$HOME/.java/$ES_BUILD_JAVA/bin:$PATH"
 export JAVA_HOME="$HOME/.java/$ES_BUILD_JAVA"
+export DOCKER_BUILDKIT=1
 
 # The Elasticsearch Dockerfile needs to be built with root privileges, but Docker on our servers is running using a non-root user
 # So, let's use docker-in-docker to temporarily create a privileged docker daemon to run `docker build` on
@@ -85,17 +85,15 @@ echo "--- Create kibana-ci docker cloud image archives"
 # When we bump versions, these dependencies may not exist yet, but we don't want to
 # block the rest of the snapshot promotion process
 set +e
-./gradlew :distribution:docker:cloud-docker-export:assemble && {
-  ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.ID}}")
-  ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.Tag}}")
+./gradlew :distribution:docker:cloud-ess-docker-export:assemble && {
+  ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch/elasticsearch-cloud-ess" --format "{{.ID}}")
+  ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch/elasticsearch-cloud-ess" --format "{{.Tag}}")
   KIBANA_ES_CLOUD_VERSION="$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
-  KIBANA_ES_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$KIBANA_ES_CLOUD_VERSION"
+  KIBANA_ES_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:$KIBANA_ES_CLOUD_VERSION"
   echo $ES_CLOUD_ID $ES_CLOUD_VERSION $KIBANA_ES_CLOUD_VERSION $KIBANA_ES_CLOUD_IMAGE
   docker tag "$ES_CLOUD_ID" "$KIBANA_ES_CLOUD_IMAGE"
 
-  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-  trap 'docker logout docker.elastic.co' EXIT
-  docker image push "$KIBANA_ES_CLOUD_IMAGE"
+  docker_with_retry push "$KIBANA_ES_CLOUD_IMAGE"
 
   export ELASTICSEARCH_CLOUD_IMAGE="$KIBANA_ES_CLOUD_IMAGE"
   export ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM="$(docker images "$KIBANA_ES_CLOUD_IMAGE" --format "{{.Digest}}")"

@@ -6,23 +6,24 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const kerberosKeytabPath = resolve(__dirname, './fixtures/kerberos/krb5.keytab');
-  const kerberosConfigPath = resolve(__dirname, './fixtures/kerberos/krb5.conf');
+  const kerberosKeytabPath = resolve(__dirname, './packages/helpers/kerberos/krb5.keytab');
+  const kerberosConfigPath = resolve(__dirname, './packages/helpers/kerberos/krb5.conf');
 
-  const testEndpointsPlugin = resolve(
-    __dirname,
-    '../security_functional/fixtures/common/test_endpoints'
-  );
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
-  const auditLogPath = resolve(__dirname, './fixtures/audit/kerberos.log');
+  const auditLogPath = resolve(__dirname, './plugins/audit_log/kerberos.log');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/kerberos')],
     servers: xPackAPITestsConfig.get('servers'),
     services,

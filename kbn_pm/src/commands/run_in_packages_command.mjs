@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
 import { REPO_ROOT } from '../lib/paths.mjs';
 import { run, spawnStreaming } from '../lib/spawn.mjs';
+import External from '../lib/external_packages.js';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -39,8 +41,8 @@ export const command = {
     const exclude = args.getStringValues('exclude') ?? [];
     const include = args.getStringValues('include') ?? [];
 
-    const { discoverBazelPackages } = await import('@kbn/bazel-packages');
-    const packages = await discoverBazelPackages(REPO_ROOT);
+    const { getPackages } = External['@kbn/repo-packages']();
+    const packages = getPackages(REPO_ROOT);
     for (const { manifest, pkg, normalizedRepoRelativeDir } of packages) {
       if (
         exclude.includes(manifest.id) ||

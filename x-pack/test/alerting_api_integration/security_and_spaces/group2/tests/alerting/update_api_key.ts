@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -14,8 +15,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -71,11 +71,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'updateApiKey',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('updateApiKey', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -98,11 +94,13 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -134,7 +132,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'updateApiKey',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -152,11 +150,13 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -186,7 +186,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'updateApiKey',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -196,17 +196,6 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'updateApiKey',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
@@ -217,11 +206,13 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -247,27 +238,16 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'updateApiKey',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'global_read at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'updateApiKey',
                   'test.restricted-noop',
-                  'alertsRestrictedFixture'
+                  'alerts'
                 ),
                 statusCode: 403,
               });
@@ -282,11 +262,13 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -326,11 +308,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'updateApiKey',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('updateApiKey', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -346,11 +324,13 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;

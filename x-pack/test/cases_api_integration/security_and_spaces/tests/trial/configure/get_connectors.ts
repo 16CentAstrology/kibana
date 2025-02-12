@@ -6,24 +6,26 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   getServiceNowConnector,
+  getServiceNowSIRConnector,
   getServiceNowOAuthConnector,
   getJiraConnector,
   getResilientConnector,
   createConnector,
-  getServiceNowSIRConnector,
   getEmailConnector,
   getCaseConnectors,
   getCasesWebhookConnector,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
+import { noCasesConnectors } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const actionsRemover = new ActionsRemover(supertest);
 
   describe('get_connectors', () => {
@@ -46,13 +48,13 @@ export default ({ getService }: FtrProviderContext): void => {
         req: getCasesWebhookConnector(),
       });
 
-      actionsRemover.add('default', sir.id, 'action', 'actions');
-      actionsRemover.add('default', snConnector.id, 'action', 'actions');
-      actionsRemover.add('default', snOAuthConnector.id, 'action', 'actions');
-      actionsRemover.add('default', emailConnector.id, 'action', 'actions');
-      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
-      actionsRemover.add('default', resilientConnector.id, 'action', 'actions');
-      actionsRemover.add('default', casesWebhookConnector.id, 'action', 'actions');
+      actionsRemover.add('default', sir.id, 'connector', 'actions');
+      actionsRemover.add('default', snConnector.id, 'connector', 'actions');
+      actionsRemover.add('default', snOAuthConnector.id, 'connector', 'actions');
+      actionsRemover.add('default', emailConnector.id, 'connector', 'actions');
+      actionsRemover.add('default', jiraConnector.id, 'connector', 'actions');
+      actionsRemover.add('default', resilientConnector.id, 'connector', 'actions');
+      actionsRemover.add('default', casesWebhookConnector.id, 'connector', 'actions');
 
       const connectors = await getCaseConnectors({ supertest });
       const sortedConnectors = connectors.sort((a, b) => a.name.localeCompare(b.name));
@@ -76,12 +78,15 @@ export default ({ getService }: FtrProviderContext): void => {
             headers: { [`content-type`]: 'application/json' },
             viewIncidentUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
             getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+            getIncidentMethod: 'get',
+            getIncidentJson: null,
             updateIncidentJson:
               '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
             updateIncidentMethod: 'put',
             updateIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -95,6 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
             projectKey: 'pkey',
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -107,6 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actionTypeId: '.servicenow',
           id: 'preconfigured-servicenow',
           isPreconfigured: true,
+          isSystemAction: false,
           isDeprecated: false,
           name: 'preconfigured-servicenow',
           referencedByCount: 0,
@@ -120,6 +127,7 @@ export default ({ getService }: FtrProviderContext): void => {
             orgId: 'pkey',
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -137,6 +145,7 @@ export default ({ getService }: FtrProviderContext): void => {
             userIdentifierValue: null,
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -154,6 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
             jwtKeyId: 'def',
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
@@ -171,11 +181,20 @@ export default ({ getService }: FtrProviderContext): void => {
             userIdentifierValue: null,
           },
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
         },
       ]);
+    });
+
+    it('should return 403 when the user does not have access to the case connectors', async () => {
+      await getCaseConnectors({
+        supertest: supertestWithoutAuth,
+        auth: { user: noCasesConnectors, space: null },
+        expectedHttpCode: 403,
+      });
     });
   });
 };

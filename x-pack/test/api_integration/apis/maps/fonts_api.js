@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import path from 'path';
 import { copyFile, rm } from 'fs/promises';
 
@@ -19,7 +23,7 @@ export default function ({ getService }) {
     // x-pack tests can be run from root directory or from within x-pack so need to cater for both possibilities.
     const fontPath = path.join(
       process.cwd().replace(/x-pack.*$/, ''),
-      'x-pack/plugins/maps/server/fonts/open_sans/0-255.pbf'
+      'x-pack/platform/plugins/shared/maps/server/fonts/open_sans/0-255.pbf'
     );
     const destinationPath = path.join(path.dirname(fontPath), '..', path.basename(fontPath));
 
@@ -35,7 +39,9 @@ export default function ({ getService }) {
 
     it('should return fonts', async () => {
       const resp = await supertest
-        .get(`/api/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/0-255`)
+        .get(`/internal/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/0-255`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       expect(resp.body.length).to.be(74696);
@@ -43,16 +49,28 @@ export default function ({ getService }) {
 
     it('should return 404 when file not found', async () => {
       await supertest
-        .get(`/api/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/noGonaFindMe`)
+        .get(
+          `/internal/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/noGonaFindMe`
+        )
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404);
     });
 
     it('should return 404 when file is not in font folder (..)', async () => {
-      await supertest.get(`/api/maps/fonts/open_sans/..%2f0-255`).expect(404);
+      await supertest
+        .get(`/internal/maps/fonts/open_sans/..%2f0-255`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(404);
     });
 
     it('should return 404 when file is not in font folder (./..)', async () => {
-      await supertest.get(`/api/maps/fonts/open_sans/.%2f..%2f0-255`).expect(404);
+      await supertest
+        .get(`/internal/maps/fonts/open_sans/.%2f..%2f0-255`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(404);
     });
   });
 }

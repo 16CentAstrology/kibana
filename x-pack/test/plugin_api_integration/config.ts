@@ -6,20 +6,15 @@
  */
 
 import path from 'path';
-import fs from 'fs';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
-  );
-
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [
       require.resolve('./test_suites/platform'),
       require.resolve('./test_suites/task_manager'),
@@ -41,11 +36,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
-        '--xpack.task_manager.ephemeral_tasks.enabled=false',
-        '--xpack.task_manager.ephemeral_tasks.request_capacity=100',
-        ...plugins.map(
-          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
-        ),
+        `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
+          'crowdstrikeConnectorOn',
+          'microsoftDefenderEndpointOn',
+        ])}`,
+        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },
   };

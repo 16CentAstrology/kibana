@@ -10,12 +10,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasExpressionTest({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
-  const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['canvas', 'common']);
-  const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+  const browser = getService('browser');
+  const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
+  const monacoEditor = getService('monacoEditor');
+  const { canvas } = getPageObjects(['canvas']);
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   describe('expression editor', function () {
     // there is an issue with FF not properly clicking on workpad elements
@@ -25,9 +27,8 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       await kibanaServer.importExport.load(archive);
 
       // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-      });
+      await canvas.goToListingPage();
+      await canvas.loadFirstWorkpad('Test Workpad');
     });
 
     after(async () => {
@@ -50,7 +51,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       await monacoEditor.waitCodeEditorReady(codeEditorSubj);
 
       // open the expression editor
-      await PageObjects.canvas.openExpressionEditor();
+      await canvas.openExpressionEditor();
       await monacoEditor.waitCodeEditorReady('canvasExpressionInput');
 
       // select markdown content and clear it
@@ -66,8 +67,39 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
         const editorText = await monacoEditor.getCodeEditorValue(1);
         expect(editorText).to.contain('Orange: Timelion, Server function and this is a test');
       });
+
       // reset the markdown
       await monacoEditor.setCodeEditorValue(oldMd, 0);
+    });
+
+    it('does not show autocomplete before typing', async () => {
+      await retry.try(async () => {
+        const elements = await find.allByCssSelector('.monaco-list-rows > .monaco-list-row');
+        expect(elements.length).to.be(0);
+      });
+    });
+
+    it('shows autocomplete when typing', async () => {
+      const originalExpression = await monacoEditor.getCodeEditorValue(1);
+      await monacoEditor.setCodeEditorValue(' ', 1);
+
+      // checks that no suggestions are rendered
+      await retry.try(async () => {
+        const elements = await find.allByCssSelector('.monaco-list-rows > .monaco-list-row');
+        expect(elements.length).to.be(0);
+      });
+
+      await testSubjects.click('canvasExpressionInput');
+      await browser.pressKeys(browser.keys.SPACE);
+
+      // checks that suggestions are rendered after typing
+      await retry.try(async () => {
+        const elements = await find.allByCssSelector('.monaco-list-rows > .monaco-list-row');
+        expect(elements.length).to.be.above(0);
+      });
+
+      // reset expression
+      await monacoEditor.setCodeEditorValue(originalExpression, 1);
     });
   });
 }

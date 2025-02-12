@@ -6,13 +6,17 @@
  */
 
 import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests')],
     servers: xPackAPITestsConfig.get('servers'),
     services,
@@ -29,7 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'a'.repeat(32),
           'b'.repeat(32),
         ])}`,
-        `--plugin-path=${path.resolve(__dirname, './fixtures/api_consumer_plugin')}`,
+        `--plugin-path=${path.resolve(__dirname, './plugins/api_consumer_plugin')}`,
       ],
     },
   };

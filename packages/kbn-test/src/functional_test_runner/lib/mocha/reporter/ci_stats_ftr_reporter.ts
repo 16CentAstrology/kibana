@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   CiStatsReporter,
   CiStatsReportTestsOptions,
@@ -16,38 +17,21 @@ import {
 } from '@kbn/ci-stats-reporter';
 
 import { Config } from '../../config';
-import { Runner } from '../../../fake_mocha_types';
+import { Runner, Runnable } from '../../../fake_mocha_types';
 import { Lifecycle } from '../../lifecycle';
 import { getSnapshotOfRunnableLogs } from '../../../../mocha';
 
-interface Suite {
-  _beforeAll: Runnable[];
-  _beforeEach: Runnable[];
-  _afterEach: Runnable[];
-  _afterAll: Runnable[];
-}
-
-interface Runnable {
-  isFailed(): boolean;
-  isPending(): boolean;
-  duration?: number;
-  titlePath(): string[];
-  file: string;
-  title: string;
-  parent: Suite;
-}
-
 function getHookType(hook: Runnable): CiStatsTestType {
-  if (hook.parent._afterAll.includes(hook)) {
+  if (hook.parent?._afterAll.includes(hook)) {
     return 'after all hook';
   }
-  if (hook.parent._afterEach.includes(hook)) {
+  if (hook.parent?._afterEach.includes(hook)) {
     return 'after each hook';
   }
-  if (hook.parent._beforeEach.includes(hook)) {
+  if (hook.parent?._beforeEach.includes(hook)) {
     return 'before each hook';
   }
-  if (hook.parent._beforeAll.includes(hook)) {
+  if (hook.parent?._beforeAll.includes(hook)) {
     return 'before all hook';
   }
 
@@ -100,7 +84,7 @@ export function setupCiStatsFtrTestGroupReporter({
       startTime: new Date(Date.now() - (runnable.duration ?? 0)).toJSON(),
       durationMs: runnable.duration ?? 0,
       seq: testRuns.length + 1,
-      file: Path.relative(REPO_ROOT, runnable.file),
+      file: Path.relative(REPO_ROOT, runnable.file ?? '.'),
       name: runnable.title,
       suites: runnable.titlePath().slice(0, -1),
       result: runnable.isFailed() ? 'fail' : runnable.isPending() ? 'skip' : 'pass',

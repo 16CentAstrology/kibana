@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityService } from '../../../../test/common/services/security/security';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 
 export const testUsers: {
   [rollName: string]: { username: string; password: string; permissions?: any };
@@ -19,6 +19,107 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_all_int_all',
+    password: 'changeme',
+  },
+  fleet_all_int_all_default_space_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+      },
+      spaces: ['default'],
+    },
+    username: 'fleet_all_int_all_default_space_only',
+    password: 'changeme',
+  },
+  fleet_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_read_only',
+    password: 'changeme',
+  },
+  fleet_minimal_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['minimal_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_minimal_all_only',
+    password: 'changeme',
+  },
+  fleet_minimal_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['minimal_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_minimal_read_only',
+    password: 'changeme',
+  },
+  fleet_agents_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agents_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agents_read_only',
+    password: 'changeme',
+  },
+  fleet_agents_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agents_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agents_all_only',
+    password: 'changeme',
+  },
+  fleet_settings_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['settings_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_settings_read_only',
+    password: 'changeme',
+  },
+  fleet_settings_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['settings_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_settings_all_only',
+    password: 'changeme',
+  },
+  fleet_agent_policies_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agent_policies_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agent_policies_read_only',
+    password: 'changeme',
+  },
+  fleet_agent_policies_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agent_policies_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agent_policies_all_only',
     password: 'changeme',
   },
   setup: {
@@ -73,11 +174,90 @@ export const testUsers: {
     username: 'integr_all',
     password: 'changeme',
   },
+  // for package_policy get one, bulk get with ids, get list
+  endpoint_integr_read_policy: {
+    permissions: {
+      feature: {
+        fleet: ['read'],
+        siemV2: [
+          'minimal_all',
+          'trusted_applications_read',
+          'host_isolation_exceptions_read',
+          'blocklist_read',
+          'event_filters_read',
+          'policy_management_read',
+        ],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy',
+    password: 'changeme',
+  },
+  // for package_policy update API
+  endpoint_integr_write_policy: {
+    permissions: {
+      feature: {
+        fleet: ['all'],
+        siemV2: ['minimal_all', 'policy_management_all'],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_write_policy',
+    password: 'changeme',
+  },
+  // agent status API
+  endpoint_fleet_all_integr_read_policy: {
+    permissions: {
+      feature: {
+        fleet: ['all'],
+        siemV2: ['minimal_all', 'policy_management_read'],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_fleet_all_integr_read_policy',
+    password: 'changeme',
+  },
+  // no access to integrations or policies
+  endpoint_fleet_read_integr_none: {
+    permissions: {
+      feature: {
+        fleet: ['read'],
+        siemV2: ['minimal_all'],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_fleet_read_integr_none',
+    password: 'changeme',
+  },
+  // no fleet or integrations but read access to security solution app
+  endpoint_integr_read_only_fleet_none: {
+    permissions: {
+      feature: {
+        siemV2: ['minimal_all'],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_only_fleet_none',
+    password: 'changeme',
+  },
 };
 
-export const setupTestUsers = async (security: SecurityService) => {
+export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
   for (const roleName in testUsers) {
-    if (testUsers.hasOwnProperty(roleName)) {
+    if (!spaceAwarenessEnabled && roleName === 'fleet_all_int_all_default_space_only') {
+      continue;
+    }
+    if (Object.hasOwn(testUsers, roleName)) {
       const user = testUsers[roleName];
 
       if (user.permissions) {

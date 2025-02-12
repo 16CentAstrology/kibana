@@ -6,9 +6,9 @@
  */
 
 import { resolve } from 'path';
-import fs from 'fs';
-import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -20,13 +20,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.js')
   );
 
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(resolve(__dirname, 'plugins', file)).isDirectory()
-  );
-
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     // list paths to the files that contain your plugins tests
     testFiles: [
       resolve(__dirname, './test_suites/resolver'),
@@ -48,7 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           KIBANA_ROOT,
           'test/plugin_functional/plugins/core_provider_plugin'
         )}`,
-        ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
+        ...findTestPluginPaths(resolve(__dirname, 'plugins')),
       ],
     },
     uiSettings: xpackFunctionalConfig.get('uiSettings'),

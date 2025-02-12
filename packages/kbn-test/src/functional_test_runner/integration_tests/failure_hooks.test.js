@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
 import stripAnsi from 'strip-ansi';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
 const FAILURE_HOOKS_CONFIG = require.resolve('./__fixtures__/failure_hooks/config.js');
 
 describe('failure hooks', function () {
   it('runs and prints expected output', () => {
-    const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG]);
+    const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG], {
+      // this FTR run should not produce a scout report
+      env: { ...process.env, SCOUT_REPORTER_ENABLED: '0' },
+    });
     const lines = stripAnsi(proc.stdout.toString('utf8')).split(/\r?\n/);
     const linesCopy = [...lines];
 

@@ -7,16 +7,23 @@
 
 import expect from '@kbn/expect';
 
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-plugin/common/constants/categorization_job';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
+import type { MlCommonUI } from './common_ui';
 
-export function MachineLearningJobWizardCategorizationProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardCategorizationProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI,
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
   return {
     async assertCategorizationDetectorTypeSelectionExists() {
       await testSubjects.existOrFail('~mlJobWizardCategorizationDetectorCountCard');
+      await testSubjects.existOrFail('~mlJobWizardCategorizationDetectorHighCountCard');
       await testSubjects.existOrFail('~mlJobWizardCategorizationDetectorRareCard');
     },
 
@@ -31,8 +38,24 @@ export function MachineLearningJobWizardCategorizationProvider({ getService }: F
       await testSubjects.existOrFail('mlCategorizationFieldNameSelect > comboBoxInput');
     },
 
+    async assertFieldStatFlyoutContentFromCategorizationFieldInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValues?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlCategorizationFieldNameSelect',
+        fieldName,
+        fieldType,
+        expectedTopValues
+      );
+    },
+
     async selectCategorizationField(identifier: string) {
-      await comboBox.set('mlCategorizationFieldNameSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlCategorizationFieldNameSelect > comboBoxInput',
+        identifier
+      );
 
       await this.assertCategorizationFieldSelection([identifier]);
     },

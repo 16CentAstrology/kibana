@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as path from 'path';
@@ -16,7 +17,7 @@ describe('parseTelemetryRC', () => {
   });
 
   it('returns parsed rc file', async () => {
-    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
+    const configRoot = path.resolve(__dirname, '__fixture__', 'telemetry_collectors');
     const config = await parseTelemetryRC(configRoot);
     expect(config).toStrictEqual([
       {

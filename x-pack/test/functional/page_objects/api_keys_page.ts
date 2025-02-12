@@ -45,6 +45,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.find('apiKeyNameInput');
     },
 
+    async isApiKeyNamePresent() {
+      return await testSubjects.exists('apiKeyNameInput');
+    },
+
     async setApiKeyCustomExpiration(expirationTime: string) {
       return await testSubjects.setValue('apiKeyCustomExpirationInput', expirationTime);
     },
@@ -57,12 +61,16 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('formFlyoutSubmitButton');
     },
 
+    async waitForSubmitButtonOnApiKeyFlyoutEnabled() {
+      return testSubjects.waitForEnabled('formFlyoutSubmitButton', 10000);
+    },
+
     async clickCancelButtonOnApiKeyFlyout() {
       return await testSubjects.click('formFlyoutCancelButton');
     },
 
     async isApiKeyModalExists() {
-      return await find.existsByCssSelector('[role="dialog"]');
+      return await find.existsByCssSelector('.euiFlyoutHeader');
     },
 
     async getNewApiKeyCreation() {
@@ -70,9 +78,8 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return euiCallOutHeader.getVisibleText();
     },
 
-    async getErrorCallOutText() {
-      const alertElem = await find.byCssSelector('[role="dialog"] [role="alert"] .euiText');
-      return await alertElem.getVisibleText();
+    async isPromptPage() {
+      return await testSubjects.exists('apiKeysCreatePromptButton');
     },
 
     async getApiKeysFirstPromptTitle() {
@@ -80,10 +87,16 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await titlePromptElem.getVisibleText();
     },
 
+    async deleteApiKeyByName(apiKeyName: string) {
+      await testSubjects.click(`apiKeysTableDeleteAction-${apiKeyName}`);
+      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.waitForDeleted(`apiKeyRowName-${apiKeyName}`);
+    },
+
     async deleteAllApiKeyOneByOne() {
-      const hasApiKeysToDelete = await testSubjects.exists('apiKeysTableDeleteAction');
+      const hasApiKeysToDelete = await testSubjects.exists('*apiKeysTableDeleteAction');
       if (hasApiKeysToDelete) {
-        const apiKeysToDelete = await testSubjects.findAll('apiKeysTableDeleteAction');
+        const apiKeysToDelete = await testSubjects.findAll('*apiKeysTableDeleteAction');
         for (const element of apiKeysToDelete) {
           await element.click();
           await testSubjects.click('confirmModalConfirmButton');
@@ -103,7 +116,15 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async clickExistingApiKeyToOpenFlyout(apiKeyName: string) {
-      await testSubjects.click(`roleRowName-${apiKeyName}`);
+      await testSubjects.click(`apiKeyRowName-${apiKeyName}`);
+    },
+
+    async ensureApiKeyExists(apiKeyName: string) {
+      await testSubjects.existOrFail(`apiKeyRowName-${apiKeyName}`);
+    },
+
+    async doesApiKeyExist(apiKeyName: string) {
+      return await testSubjects.exists(`apiKeyRowName-${apiKeyName}`);
     },
 
     async getMetadataSwitch() {
@@ -127,11 +148,6 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return header.getVisibleText();
     },
 
-    async getFlyoutUsername() {
-      const usernameField = await testSubjects.find('apiKeyFlyoutUsername');
-      return usernameField.getVisibleText();
-    },
-
     async getFlyoutApiKeyStatus() {
       const apiKeyStatusField = await testSubjects.find('apiKeyStatus');
       return apiKeyStatusField.getVisibleText();
@@ -140,6 +156,35 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     async getApiKeyUpdateSuccessToast() {
       const toast = await testSubjects.find('updateApiKeySuccessToast');
       return toast.getVisibleText();
+    },
+
+    async clickExpiryFilters(type: 'active' | 'expired') {
+      const button = await testSubjects.find(
+        type === 'active' ? 'activeFilterButton' : 'expiredFilterButton'
+      );
+      return button.click();
+    },
+
+    async clickTypeFilters(type: 'personal' | 'managed' | 'cross_cluster') {
+      const buttonMap = {
+        personal: 'personalFilterButton',
+        managed: 'managedFilterButton',
+        cross_cluster: 'crossClusterFilterButton',
+      };
+
+      const button = await testSubjects.find(buttonMap[type]);
+      return button.click();
+    },
+
+    async clickUserNameDropdown() {
+      const button = await testSubjects.find('ownerFilterButton');
+      return button.click();
+    },
+
+    async setSearchBarValue(query: string) {
+      const searchBar = await testSubjects.find('apiKeysSearchBar');
+      await searchBar.clearValue();
+      return searchBar.type(query);
     },
   };
 }

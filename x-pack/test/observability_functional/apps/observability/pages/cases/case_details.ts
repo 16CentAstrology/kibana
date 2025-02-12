@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CommentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header']);
+  const retry = getService('retry');
 
   describe('Observability cases', () => {
     before(async () => {
@@ -32,31 +33,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['all'],
+            observabilityCasesV3: ['all'],
             logs: ['all'],
           })
         );
 
         const owner = 'observability';
-        const caseData = await cases.api.createCase({
-          title: 'Sample case',
-          owner,
-        });
-        await cases.api.createAttachment({
-          caseId: caseData.id,
-          params: {
-            alertId: ['alert-id'],
-            index: ['.internal.alerts-observability.alerts-default-000001'],
-            rule: { id: 'rule-id', name: 'My rule name' },
-            type: CommentType.alert,
+        await retry.try(async () => {
+          const caseData = await cases.api.createCase({
+            title: 'Sample case',
             owner,
-          },
+          });
+          await cases.api.createAttachment({
+            caseId: caseData.id,
+            params: {
+              alertId: ['alert-id'],
+              index: ['.internal.alerts-observability.alerts-default-000001'],
+              rule: { id: 'rule-id', name: 'My rule name' },
+              type: AttachmentType.alert,
+              owner,
+            },
+          });
         });
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
-        await observability.users.restoreDefaultTestUserRole();
+        await retry.try(async () => {
+          await cases.api.deleteAllCases();
+          await observability.users.restoreDefaultTestUserRole();
+        });
       });
 
       it('should link to observability rule pages in case details', async () => {

@@ -11,17 +11,20 @@ import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
+import { bundlePackage, removeBundledPackages } from './install_bundled';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
   const supertest = getService('supertest');
+  const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
+  const log = getService('log');
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -38,9 +41,24 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
   );
 
+  async function uploadPackage(zipPackage: string) {
+    // wait 10s before uploading again to avoid getting 429
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+    const buf = fs.readFileSync(zipPackage);
+    return await supertest
+      .post(`/api/fleet/epm/packages`)
+      .set('kbn-xsrf', 'xxxx')
+      .type('application/zip')
+      .send(buf)
+      .expect(200);
+  }
+
   describe('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     it('returns package info from the registry if it was installed from the registry', async function () {
       // this will install through the registry by default
@@ -55,14 +73,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.download).to.not.equal(undefined);
       await uninstallPackage(testPkgName, testPkgVersion);
     });
+
     it('returns correct package info if it was installed by upload', async function () {
-      const buf = fs.readFileSync(testPkgArchiveZip);
-      await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(200);
+      await uploadPackage(testPkgArchiveZip);
 
       const res = await supertest
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
@@ -74,14 +87,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.download).to.not.equal(undefined);
       await uninstallPackage(testPkgName, testPkgVersion);
     });
+
     it('returns correct package info from registry if a different version is installed by upload', async function () {
-      const buf = fs.readFileSync(testPkgArchiveZip);
-      await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(200);
+      await uploadPackage(testPkgArchiveZip);
 
       const res = await supertest.get(`/api/fleet/epm/packages/apache/0.1.3`).expect(200);
       const packageInfo = res.body.item;
@@ -95,13 +103,7 @@ export default function (providerContext: FtrProviderContext) {
         path.dirname(__filename),
         '../fixtures/direct_upload_packages/apache_9999.0.0.zip'
       );
-      const buf = fs.readFileSync(testPkgArchiveZipV9999);
-      await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(200);
+      await uploadPackage(testPkgArchiveZipV9999);
 
       const res = await supertest.get(`/api/fleet/epm/packages/apache/9999.0.0`).expect(200);
       const packageInfo = res.body.item;
@@ -110,6 +112,89 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(testPkgName, '9999.0.0');
     });
 
+    describe('Installed Packages', () => {
+      before(async () => {
+        await installPackage(testPkgName, testPkgVersion);
+        await installPackage('experimental', '0.1.0');
+        await bundlePackage('endpoint-8.6.1');
+        await installPackage('endpoint', '8.6.1');
+        await es.index({
+          index: 'logs-apache.access-default',
+          document: {
+            '@timestamp': new Date().toISOString(),
+          },
+          refresh: 'wait_for',
+        });
+      });
+      after(async () => {
+        await uninstallPackage(testPkgName, testPkgVersion);
+        await uninstallPackage('experimental', '0.1.0');
+        await uninstallPackage('endpoint', '8.6.1');
+        await removeBundledPackages(log);
+        await es.indices.deleteDataStream({
+          name: 'logs-apache.access-default',
+        });
+      });
+      it('Allows the fetching of installed packages', async () => {
+        const res = await supertest.get(`/api/fleet/epm/packages/installed`).expect(200);
+        const packages = res.body.items;
+        const packageNames = packages.map((pkg: any) => pkg.name);
+        expect(packageNames).to.contain('apache');
+        expect(packageNames).to.contain('endpoint');
+        expect(packageNames).to.contain('experimental');
+        expect(packageNames.length).to.be(3);
+      });
+      it('Can be limited with perPage', async () => {
+        const res = await supertest.get(`/api/fleet/epm/packages/installed?perPage=2`).expect(200);
+        const packages = res.body.items;
+        expect(packages.length).to.be(2);
+      });
+      it('Can be queried by dataStreamType', async () => {
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/installed?dataStreamType=metrics`)
+          .expect(200);
+        const packages = res.body.items;
+        let dataStreams = [] as any;
+        packages.forEach((packageItem: any) => {
+          dataStreams = dataStreams.concat(packageItem.dataStreams);
+        });
+        const streamsWithWrongType = dataStreams.filter((stream: any) => {
+          return !stream.name.startsWith('metrics-');
+        });
+        expect(streamsWithWrongType.length).to.be(0);
+      });
+      it('Can be sorted', async () => {
+        const ascRes = await supertest
+          .get(`/api/fleet/epm/packages/installed?sortOrder=asc`)
+          .expect(200);
+        const ascPackages = ascRes.body.items;
+        expect(ascPackages[0].name).to.be('apache');
+
+        const descRes = await supertest
+          .get(`/api/fleet/epm/packages/installed?sortOrder=desc`)
+          .expect(200);
+        const descPackages = descRes.body.items;
+        expect(descPackages[0].name).to.be('experimental');
+      });
+      it('Can be filtered by name', async () => {
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/installed?nameQuery=experimental`)
+          .expect(200);
+        const packages = res.body.items;
+        expect(packages.length).to.be(1);
+        expect(packages[0].name).to.be('experimental');
+      });
+      it('Can be to only return active datastreams', async () => {
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/installed?nameQuery=apache&showOnlyActiveDataStreams=true`)
+          .expect(200);
+        const packages = res.body.items;
+        expect(packages.length).to.be(1);
+        expect(packages[0].name).to.be('apache');
+        expect(packages[0].dataStreams.length).to.be(1);
+        expect(packages[0].dataStreams[0].name).to.be('logs-apache.access-*');
+      });
+    });
     it('returns a 404 for a package that do not exists', async function () {
       await supertest.get('/api/fleet/epm/packages/notexists/99.99.99').expect(404);
     });
@@ -140,7 +225,10 @@ export default function (providerContext: FtrProviderContext) {
     it('returns package info in item field when calling without version', async function () {
       // this will install through the registry by default
       await installPackage(testPkgName, testPkgVersion);
-      const res = await supertest.get(`/api/fleet/epm/packages/${testPkgName}`).expect(200);
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/${testPkgName}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
       const packageInfo = res.body.item;
       // the uploaded version will have this description
       expect(packageInfo.name).to.equal('apache');
@@ -151,7 +239,7 @@ export default function (providerContext: FtrProviderContext) {
       // not from the package registry. This is because they contain a field the registry
       // does not support
       const res = await supertest
-        .get(`/api/fleet/epm/packages/integration_to_input/0.9.1?prerelease=true`)
+        .get(`/api/fleet/epm/packages/integration_to_input/2.0.0`)
         .expect(200);
 
       const packageInfo = res.body.item;
@@ -207,6 +295,35 @@ export default function (providerContext: FtrProviderContext) {
         ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
       );
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
+    });
+
+    it('allows user with only package level permission to access corresponding packages', async function () {
+      const pkg = 'endpoint';
+      const pkgVersion = '8.6.0';
+      await installPackage(pkg, pkgVersion);
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${pkg}/${pkgVersion}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(200);
+      expect(response.body.item.name).to.be(pkg);
+      expect(response.body.item.version).to.be(pkgVersion);
+      await uninstallPackage(pkg, pkgVersion);
+    });
+
+    it('rejects user with only package level permission to access unauthorized packages', async function () {
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(403);
+      expect(response.body.message).to.be(
+        'Authorization denied to package: apache. Allowed package(s): endpoint'
+      );
     });
   });
 }

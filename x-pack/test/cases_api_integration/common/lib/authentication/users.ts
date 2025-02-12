@@ -17,6 +17,15 @@ import {
   testDisabledPluginAll,
   securitySolutionOnlyDelete,
   securitySolutionOnlyNoDelete,
+  observabilityOnlyReadAlerts,
+  securitySolutionOnlyReadAlerts,
+  securitySolutionOnlyReadNoIndexAlerts,
+  securitySolutionOnlyReadDelete,
+  noCasesConnectors as noCasesConnectorRole,
+  onlyActions as onlyActionsRole,
+  securitySolutionOnlyCreateComment,
+  securitySolutionOnlyNoCreateComment,
+  securitySolutionOnlyReadCreateComment,
 } from './roles';
 import { User } from './types';
 
@@ -44,16 +53,52 @@ export const secOnlyDelete: User = {
   roles: [securitySolutionOnlyDelete.name],
 };
 
+export const secOnlyReadDelete: User = {
+  username: 'sec_only_read_delete',
+  password: 'sec_only_read_delete',
+  roles: [securitySolutionOnlyReadDelete.name],
+};
+
 export const secOnlyNoDelete: User = {
   username: 'sec_only_no_delete',
   password: 'sec_only_no_delete',
   roles: [securitySolutionOnlyNoDelete.name],
 };
 
+export const secOnlyCreateComment: User = {
+  username: 'sec_only_create_comment',
+  password: 'sec_only_create_comment',
+  roles: [securitySolutionOnlyCreateComment.name],
+};
+
+export const secOnlyReadCreateComment: User = {
+  username: 'sec_only_read_create_comment',
+  password: 'sec_only_read_create_comment',
+  roles: [securitySolutionOnlyReadCreateComment.name],
+};
+
+export const secOnlyNoCreateComment: User = {
+  username: 'sec_only_no_create_comment',
+  password: 'sec_only_no_create_comment',
+  roles: [securitySolutionOnlyNoCreateComment.name],
+};
+
 export const secOnlyRead: User = {
   username: 'sec_only_read',
   password: 'sec_only_read',
   roles: [securitySolutionOnlyRead.name],
+};
+
+export const secOnlyReadAlerts: User = {
+  username: 'sec_only_read_alerts',
+  password: 'sec_only_read_alerts',
+  roles: [securitySolutionOnlyReadAlerts.name],
+};
+
+export const secSolutionOnlyReadNoIndexAlerts: User = {
+  username: 'sec_only_read_no_index_alerts',
+  password: 'sec_only_read_no_index_alerts',
+  roles: [securitySolutionOnlyReadNoIndexAlerts.name],
 };
 
 export const obsOnly: User = {
@@ -66,6 +111,12 @@ export const obsOnlyRead: User = {
   username: 'obs_only_read',
   password: 'obs_only_read',
   roles: [observabilityOnlyRead.name],
+};
+
+export const obsOnlyReadAlerts: User = {
+  username: 'obs_only_read_alerts',
+  password: 'obs_only_read_alerts',
+  roles: [observabilityOnlyReadAlerts.name],
 };
 
 export const obsSec: User = {
@@ -93,9 +144,15 @@ export const noKibanaPrivileges: User = {
 };
 
 export const noCasesPrivilegesSpace1: User = {
-  username: 'no_kibana_privileges_space1',
-  password: 'no_kibana_privileges_space1',
+  username: 'no_cases_privileges_space1',
+  password: 'no_cases_privileges_space1',
   roles: [noCasesPrivilegesSpace1Role.name],
+};
+
+export const noCasesConnectors: User = {
+  username: 'no_cases_connectors',
+  password: 'no_cases_connectors',
+  roles: [noCasesConnectorRole.name],
 };
 
 /**
@@ -108,18 +165,33 @@ export const secOnlySpacesAll: User = {
   roles: [securitySolutionOnlyAllSpacesRole.name],
 };
 
+export const onlyActions: User = {
+  username: 'only_actions',
+  password: 'only_actions',
+  roles: [onlyActionsRole.name],
+};
+
 export const users = [
   superUser,
   secOnly,
   secOnlyRead,
+  secOnlyReadAlerts,
+  secSolutionOnlyReadNoIndexAlerts,
   secOnlyDelete,
+  secOnlyReadDelete,
   secOnlyNoDelete,
+  secOnlyCreateComment,
+  secOnlyReadCreateComment,
+  secOnlyNoCreateComment,
   obsOnly,
   obsOnlyRead,
+  obsOnlyReadAlerts,
   obsSec,
   obsSecRead,
   globalRead,
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
   testDisabled,
+  noCasesConnectors,
+  onlyActions,
 ];

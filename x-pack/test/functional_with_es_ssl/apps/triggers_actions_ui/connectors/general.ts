@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
@@ -13,6 +16,8 @@ import {
   getConnectorByName,
   createSlackConnectorAndObjectRemover,
   createSlackConnector,
+  createRuleWithActionsAndParams,
+  getAlertSummary,
 } from './utils';
 
 export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
@@ -23,6 +28,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const supertest = getService('supertest');
   let objectRemover: ObjectRemover;
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   describe('General connector functionality', function () {
     before(async () => {
@@ -56,7 +62,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
       );
 
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -69,17 +75,17 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         },
       ]);
       const connector = await getConnectorByName(connectorName, supertest);
-      objectRemover.add(connector.id, 'action', 'actions');
+      objectRemover.add(connector.id, 'connector', 'actions');
     });
 
     it('should edit a connector', async () => {
       const connectorName = generateUniqueKey();
       const updatedConnectorName = `${connectorName}updated`;
-      const createdAction = await createSlackConnector({
+      const createdConnector = await createSlackConnector({
         name: connectorName,
         getService,
       });
-      objectRemover.add(createdAction.id, 'action', 'actions');
+      objectRemover.add(createdConnector.id, 'connector', 'actions');
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -97,7 +103,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         '[data-test-subj="edit-connector-flyout-save-btn"]:not(disabled)'
       );
 
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
 
       await testSubjects.click('euiFlyoutCloseButton');
@@ -116,8 +122,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     it('should test a connector and display a successful result', async () => {
       const connectorName = generateUniqueKey();
       const indexName = generateUniqueKey();
-      const createdAction = await createIndexConnector(connectorName, indexName);
-      objectRemover.add(createdAction.id, 'action', 'actions');
+      const createdConnector = await createIndexConnector(connectorName, indexName);
+      objectRemover.add(createdConnector.id, 'connector', 'actions');
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -146,8 +152,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     it('should test a connector and display a failure result', async () => {
       const connectorName = generateUniqueKey();
       const indexName = generateUniqueKey();
-      const createdAction = await createIndexConnector(connectorName, indexName);
-      objectRemover.add(createdAction.id, 'action', 'actions');
+      const createdConnector = await createIndexConnector(connectorName, indexName);
+      objectRemover.add(createdConnector.id, 'connector', 'actions');
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -174,11 +180,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
     it('should reset connector when canceling an edit', async () => {
       const connectorName = generateUniqueKey();
-      const createdAction = await createSlackConnector({
+      const createdConnector = await createSlackConnector({
         name: connectorName,
         getService,
       });
-      objectRemover.add(createdAction.id, 'action', 'actions');
+      objectRemover.add(createdConnector.id, 'connector', 'actions');
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -206,11 +212,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     it('should delete a connector', async () => {
       const connectorName = generateUniqueKey();
       await createSlackConnector({ name: connectorName, getService });
-      const createdAction = await createSlackConnector({
+      const createdConnector = await createSlackConnector({
         name: generateUniqueKey(),
         getService,
       });
-      objectRemover.add(createdAction.id, 'action', 'actions');
+      objectRemover.add(createdConnector.id, 'connector', 'actions');
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -223,7 +229,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -235,11 +241,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     it('should bulk delete connectors', async () => {
       const connectorName = generateUniqueKey();
       await createSlackConnector({ name: connectorName, getService });
-      const createdAction = await createSlackConnector({
+      const createdConnector = await createSlackConnector({
         name: generateUniqueKey(),
         getService,
       });
-      objectRemover.add(createdAction.id, 'action', 'actions');
+      objectRemover.add(createdConnector.id, 'connector', 'actions');
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -254,7 +260,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -291,10 +297,111 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
       expect(await testSubjects.exists('edit-connector-flyout-save-btn')).to.be(false);
     });
+
+    describe('Execution log', () => {
+      const testRunUuid = uuidv4();
+      let rule: any;
+
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+
+        const connectorName = generateUniqueKey();
+        const createdConnector = await createSlackConnector({ name: connectorName, getService });
+        objectRemover.add(createdConnector.id, 'connector', 'actions');
+
+        const alerts = [{ id: 'us-central' }];
+        rule = await createRuleWithActionsAndParams(
+          createdConnector.id,
+          testRunUuid,
+          {
+            instances: alerts,
+          },
+          {
+            schedule: { interval: '1s' },
+          },
+          supertest
+        );
+        objectRemover.add(rule.id, 'rule', 'alerting');
+
+        // refresh to see rule
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
+
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { alerts: alertInstances } = await getAlertSummary(rule.id, supertest);
+          expect(Object.keys(alertInstances).length).to.eql(alerts.length);
+        });
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
+      });
+
+      it('renders the event log list and can filter/sort', async () => {
+        await browser.refresh();
+        await (await testSubjects.find('logsTab')).click();
+
+        const tabbedContentExists = await testSubjects.exists('ruleDetailsTabbedContent');
+        if (!tabbedContentExists) {
+          return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const refreshButton = await testSubjects.find('superDatePickerApplyTimeButton');
+        await refreshButton.click();
+
+        // List, date picker, and status picker all exists
+        await testSubjects.existOrFail('eventLogList');
+        await testSubjects.existOrFail('eventLogStatusFilterButton');
+
+        let statusFilter = await testSubjects.find('eventLogStatusFilterButton');
+        let statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
+
+        expect(statusNumber.getVisibleText()).to.eql(0);
+
+        await statusFilter.click();
+        await testSubjects.click('eventLogStatusFilter-success');
+        await statusFilter.click();
+
+        statusFilter = await testSubjects.find('eventLogStatusFilterButton');
+        statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
+
+        expect(statusNumber.getVisibleText()).to.eql(1);
+
+        const eventLogList = await find.byCssSelector('.euiDataGridRow');
+        const rows = await eventLogList.parseDomContent();
+        expect(rows.length).to.be.greaterThan(0);
+
+        await pageObjects.triggersActionsUI.ensureEventLogColumnExists('timestamp');
+
+        const timestampCells = await find.allByCssSelector(
+          '[data-gridcell-column-id="timestamp"][data-test-subj="dataGridRowCell"]'
+        );
+
+        let validTimestamps = 0;
+        await asyncForEach(timestampCells, async (cell) => {
+          const text = await cell.getVisibleText();
+          if (text.toLowerCase() !== 'invalid date') {
+            if (moment(text).isValid()) {
+              validTimestamps += 1;
+            }
+          }
+        });
+        expect(validTimestamps).to.be.greaterThan(0);
+
+        await pageObjects.triggersActionsUI.sortEventLogColumn('timestamp', 'asc');
+        await testSubjects.existOrFail('dataGridHeaderCellSortingIcon-timestamp');
+      });
+    });
   });
 
   async function createIndexConnector(connectorName: string, indexName: string) {
-    const { body: createdAction } = await supertest
+    const { body: createdConnector } = await supertest
       .post(`/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send({
@@ -307,6 +414,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         secrets: {},
       })
       .expect(200);
-    return createdAction;
+    return createdConnector;
   }
 };

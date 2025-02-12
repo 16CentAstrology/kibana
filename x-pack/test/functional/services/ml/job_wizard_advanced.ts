@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningJobWizardAdvancedProvider(
   { getService }: FtrProviderContext,
@@ -17,26 +17,24 @@ export function MachineLearningJobWizardAdvancedProvider(
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const aceEditor = getService('aceEditor');
+  const monacoEditor = getService('monacoEditor');
 
   return {
     async getValueOrPlaceholder(inputLocator: string): Promise<string> {
       const value = await testSubjects.getAttribute(inputLocator, 'value');
-      if (value !== '') {
-        return value;
+      if (!value) {
+        return (await testSubjects.getAttribute(inputLocator, 'placeholder')) ?? '';
       } else {
-        return await testSubjects.getAttribute(inputLocator, 'placeholder');
+        return value;
       }
     },
 
     async assertDatafeedQueryEditorExists() {
-      await testSubjects.existOrFail('mlAdvancedDatafeedQueryEditor > codeEditorContainer');
+      await testSubjects.existOrFail('mlAdvancedDatafeedQueryEditor > ~codeEditorHint');
     },
 
     async assertDatafeedQueryEditorValue(expectedValue: string) {
-      const actualValue = await aceEditor.getValue(
-        'mlAdvancedDatafeedQueryEditor > codeEditorContainer'
-      );
+      const actualValue = await monacoEditor.getCodeEditorValue();
       expect(actualValue).to.eql(
         expectedValue,
         `Expected datafeed query editor value to be '${expectedValue}' (got '${actualValue}')`
@@ -127,17 +125,16 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertCategorizationFieldSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlCategorizationFieldNameSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
+      await mlCommonUI.assertOptionsListWithFieldStatsValue(
+        'mlCategorizationFieldNameSelect > comboBoxInput',
         expectedIdentifier,
-        `Expected categorization field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        'categorization field selection'
       );
     },
 
     async selectCategorizationField(identifier: string) {
-      await comboBox.set('mlCategorizationFieldNameSelect > comboBoxInput', identifier);
+      const selector = 'mlCategorizationFieldNameSelect > comboBoxInput';
+      await mlCommonUI.setOptionsListWithFieldStatsValue(selector, identifier);
       await this.assertCategorizationFieldSelection([identifier]);
     },
 
@@ -146,18 +143,19 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertSummaryCountFieldSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlSummaryCountFieldNameSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
+      await mlCommonUI.assertOptionsListWithFieldStatsValue(
+        'mlSummaryCountFieldNameSelect > comboBoxInput',
         expectedIdentifier,
-        `Expected summary count field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        'summary count field selection'
       );
     },
 
     async selectSummaryCountField(identifier: string) {
       await retry.tryForTime(15 * 1000, async () => {
-        await comboBox.set('mlSummaryCountFieldNameSelect > comboBoxInput', identifier);
+        await mlCommonUI.setOptionsListWithFieldStatsValue(
+          'mlSummaryCountFieldNameSelect > comboBoxInput',
+          identifier
+        );
         await this.assertSummaryCountFieldSelection([identifier]);
       });
     },
@@ -201,17 +199,18 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertDetectorFieldSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlAdvancedFieldSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
+      await mlCommonUI.assertOptionsListWithFieldStatsValue(
+        'mlAdvancedFieldSelect > comboBoxInput',
         expectedIdentifier,
-        `Expected detector field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        'detector field selection'
       );
     },
 
     async selectDetectorField(identifier: string) {
-      await comboBox.set('mlAdvancedFieldSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlAdvancedFieldSelect > comboBoxInput',
+        identifier
+      );
       await this.assertDetectorFieldSelection([identifier]);
     },
 
@@ -220,17 +219,18 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertDetectorByFieldSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlAdvancedByFieldSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
+      await mlCommonUI.assertOptionsListWithFieldStatsValue(
+        'mlAdvancedByFieldSelect > comboBoxInput',
         expectedIdentifier,
-        `Expected detector by field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        'detector by field selection'
       );
     },
 
     async selectDetectorByField(identifier: string) {
-      await comboBox.set('mlAdvancedByFieldSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlAdvancedByFieldSelect > comboBoxInput',
+        identifier
+      );
       await this.assertDetectorByFieldSelection([identifier]);
     },
 
@@ -239,17 +239,18 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertDetectorOverFieldSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlAdvancedOverFieldSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
+      await mlCommonUI.assertOptionsListWithFieldStatsValue(
+        'mlAdvancedOverFieldSelect > comboBoxInput',
         expectedIdentifier,
-        `Expected detector over field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        'detector over field selection'
       );
     },
 
     async selectDetectorOverField(identifier: string) {
-      await comboBox.set('mlAdvancedOverFieldSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlAdvancedOverFieldSelect > comboBoxInput',
+        identifier
+      );
       await this.assertDetectorOverFieldSelection([identifier]);
     },
 
@@ -258,17 +259,18 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertDetectorPartitionFieldSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlAdvancedPartitionFieldSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
+      await mlCommonUI.assertOptionsListWithFieldStatsValue(
+        'mlAdvancedPartitionFieldSelect > comboBoxInput',
         expectedIdentifier,
-        `Expected detector partition field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        'detector partition field selection'
       );
     },
 
     async selectDetectorPartitionField(identifier: string) {
-      await comboBox.set('mlAdvancedPartitionFieldSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlAdvancedPartitionFieldSelect > comboBoxInput',
+        identifier
+      );
       await this.assertDetectorPartitionFieldSelection([identifier]);
     },
 
@@ -277,17 +279,18 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertDetectorExcludeFrequentSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlAdvancedExcludeFrequentSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
+      await mlCommonUI.assertOptionsListWithFieldStatsValue(
+        'mlAdvancedExcludeFrequentSelect > comboBoxInput',
         expectedIdentifier,
-        `Expected detector exclude frequent selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        'detector exclude frequent selection'
       );
     },
 
     async selectDetectorExcludeFrequent(identifier: string) {
-      await comboBox.set('mlAdvancedExcludeFrequentSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlAdvancedExcludeFrequentSelect > comboBoxInput',
+        identifier
+      );
       await this.assertDetectorExcludeFrequentSelection([identifier]);
     },
 

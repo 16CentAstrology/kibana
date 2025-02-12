@@ -7,7 +7,7 @@
 
 import type { FieldVisConfig } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/types';
 
-export interface MetricFieldVisConfig extends FieldVisConfig {
+export interface MetricFieldVisConfig extends Omit<FieldVisConfig, 'secondaryType'> {
   fieldName: string;
   statsMaxDecimalPlaces: number;
   docCountFormatted: string;
@@ -16,7 +16,7 @@ export interface MetricFieldVisConfig extends FieldVisConfig {
   hasActionMenu?: boolean;
 }
 
-export interface NonMetricFieldVisConfig extends FieldVisConfig {
+export interface NonMetricFieldVisConfig extends Omit<FieldVisConfig, 'secondaryType'> {
   fieldName: string;
   docCountFormatted: string;
   exampleCount: number;
@@ -36,7 +36,9 @@ export interface TestData {
     size: number;
     expected: { field: string; docCountFormatted: string };
   }>;
+  query?: string;
   expected: {
+    initialLimitSize?: string;
     filters?: Array<{
       key: string;
       value: string;

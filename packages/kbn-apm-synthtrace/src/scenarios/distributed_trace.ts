@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, timerange } from '../..';
-import { ApmFields } from '../lib/apm/apm_fields';
+import { apm, ApmFields, httpExitSpan } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { httpExitSpan } from '../lib/apm/span';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
+    generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = '240rpm/75% 1000ms';
       const successfulTimestamps = range.interval('1s').rate(3);
 
@@ -89,7 +88,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           );
       });
 
-      return traces;
+      return withClient(apmEsClient, traces);
     },
   };
 };

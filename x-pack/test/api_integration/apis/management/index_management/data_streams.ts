@@ -9,81 +9,22 @@ import expect from '@kbn/expect';
 
 import { DataStream } from '@kbn/index-management-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-// @ts-ignore
 import { API_BASE_PATH } from './constants';
+import { datastreamsHelpers } from './lib/datastreams.helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  const createDataStream = async (name: string) => {
-    // A data stream requires an index template before it can be created.
-    await es.indices.putIndexTemplate({
-      name,
-      body: {
-        // We need to match the names of backing indices with this template.
-        index_patterns: [name + '*'],
-        template: {
-          mappings: {
-            properties: {
-              '@timestamp': {
-                type: 'date',
-              },
-            },
-          },
-        },
-        data_stream: {},
-      },
-    });
-
-    await es.indices.createDataStream({ name });
-  };
-
-  const updateIndexTemplateMappings = async (name: string, mappings: any) => {
-    await es.indices.putIndexTemplate({
-      name,
-      body: {
-        // We need to match the names of backing indices with this template.
-        index_patterns: [name + '*'],
-        template: {
-          mappings,
-        },
-        data_stream: {},
-      },
-    });
-  };
-
-  const getDatastream = async (name: string) => {
-    const {
-      data_streams: [datastream],
-    } = await es.indices.getDataStream({ name });
-    return datastream;
-  };
-
-  const getMapping = async (name: string) => {
-    const res = await es.indices.getMapping({ index: name });
-
-    return Object.values(res)[0]!.mappings;
-  };
-
-  const deleteComposableIndexTemplate = async (name: string) => {
-    await es.indices.deleteIndexTemplate({ name });
-  };
-
-  const deleteDataStream = async (name: string) => {
-    await es.indices.deleteDataStream({ name });
-    await deleteComposableIndexTemplate(name);
-  };
-
-  const assertDataStreamStorageSizeExists = (storageSize: string, storageSizeBytes: number) => {
-    // Storage size of a document doesn't look like it would be deterministic (could vary depending
-    // on how ES, Lucene, and the file system interact), so we'll just assert its presence and
-    // type.
-    expect(storageSize).to.be.ok();
-    expect(typeof storageSize).to.be('string');
-    expect(storageSizeBytes).to.be.ok();
-    expect(typeof storageSizeBytes).to.be('number');
-  };
+  const {
+    createDataStream,
+    deleteDataStream,
+    assertDataStreamStorageSizeExists,
+    deleteComposableIndexTemplate,
+    updateIndexTemplateMappings,
+    getMapping,
+    getDatastream,
+  } = datastreamsHelpers(getService);
 
   describe('Data streams', function () {
     describe('Get', () => {
@@ -112,20 +53,28 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(testDataStream).to.eql({
           name: testDataStreamName,
+          lifecycle: {
+            enabled: true,
+          },
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
             {
               name: indexName,
               uuid,
+              preferILM: true,
+              managedBy: 'Data stream lifecycle',
             },
           ],
+          nextGenerationManagedBy: 'Data stream lifecycle',
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,
           hidden: false,
+          indexMode: 'standard',
         });
       });
 
@@ -153,19 +102,27 @@ export default function ({ getService }: FtrProviderContext) {
           name: testDataStreamName,
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
             {
               name: indexName,
+              managedBy: 'Data stream lifecycle',
+              preferILM: true,
               uuid,
             },
           ],
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,
+          nextGenerationManagedBy: 'Data stream lifecycle',
           maxTimeStamp: 0,
           hidden: false,
+          lifecycle: {
+            enabled: true,
+          },
+          indexMode: 'standard',
         });
       });
 
@@ -184,20 +141,163 @@ export default function ({ getService }: FtrProviderContext) {
           name: testDataStreamName,
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
             {
               name: indexName,
+              managedBy: 'Data stream lifecycle',
+              preferILM: true,
               uuid,
             },
           ],
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,
+          nextGenerationManagedBy: 'Data stream lifecycle',
           maxTimeStamp: 0,
           hidden: false,
+          lifecycle: {
+            enabled: true,
+          },
+          indexMode: 'standard',
         });
+      });
+
+      describe('index mode', () => {
+        it('correctly returns index mode property based on index settings', async () => {
+          const logsdbDataStreamName = 'logsdb-test-data-stream';
+          const indexMode = 'logsdb';
+
+          await createDataStream(logsdbDataStreamName, indexMode);
+
+          const { body: dataStream } = await supertest
+            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
+          expect(dataStream.indexMode).to.eql(indexMode);
+
+          await deleteDataStream(logsdbDataStreamName);
+        });
+
+        describe('index mode of logs-*-* data streams', () => {
+          const logsdbDataStreamName = 'logs-test-ds';
+
+          before(async () => {
+            await createDataStream(logsdbDataStreamName);
+          });
+
+          after(async () => {
+            await deleteDataStream(logsdbDataStreamName);
+          });
+
+          const logsdbSettings: Array<{
+            enabled: boolean | null;
+            prior_logs_usage: boolean;
+            indexMode: string;
+          }> = [
+            { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
+            { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
+            // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
+            { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
+            // In stateful Kibana, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+            { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
+          ];
+
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
+            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled} and logs.prior_logs_usage is ${prior_logs_usage}`, async () => {
+              await es.cluster.putSettings({
+                body: {
+                  persistent: {
+                    cluster: {
+                      logsdb: {
+                        enabled,
+                      },
+                    },
+                    logsdb: {
+                      prior_logs_usage,
+                    },
+                  },
+                },
+              });
+
+              const { body: dataStream } = await supertest
+                .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
+                .set('kbn-xsrf', 'xxx')
+                .expect(200);
+
+              expect(dataStream.indexMode).to.eql(indexMode);
+            });
+          });
+        });
+      });
+    });
+
+    describe('Update', () => {
+      const testDataStreamName1 = 'test-data-stream1';
+      const testDataStreamName2 = 'test-data-stream2';
+
+      before(async () => {
+        await createDataStream(testDataStreamName1);
+        await createDataStream(testDataStreamName2);
+      });
+      after(async () => {
+        await deleteDataStream(testDataStreamName1);
+        await deleteDataStream(testDataStreamName2);
+      });
+
+      it('updates the data retention of a DS', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            dataRetention: '7d',
+            dataStreams: [testDataStreamName1],
+          })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+      });
+
+      it('updates the data retention of multiple DS', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            dataRetention: '7d',
+            dataStreams: [testDataStreamName1, testDataStreamName2],
+          })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+      });
+
+      it('sets data retention to infinite', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            dataStreams: [testDataStreamName1],
+          })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+      });
+
+      it('can disable lifecycle for a given policy', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ enabled: false, dataStreams: [testDataStreamName1] })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+
+        const datastream = await getDatastream(testDataStreamName1);
+        expect(datastream.lifecycle).to.be(undefined);
       });
     });
 

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { sumBy } from 'lodash';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_explorer_types';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type StorageTimeSeries = APIReturnType<'GET /internal/apm/storage_chart'>;
@@ -16,7 +16,7 @@ type StorageTimeSeries = APIReturnType<'GET /internal/apm/storage_chart'>;
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when(
-    'Storage explorer timeseries chart when data is not loaded',
+    'Storage Explorer timeseries chart when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
@@ -50,7 +50,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Storage explorer timeseries chart', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177539
+  registry.when('Storage Explorer timeseries chart', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       let body: StorageTimeSeries;
       let status: number;
@@ -63,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-go-2', environment: 'production', agentName: 'go' })
           .instance('instance');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('5m')
             .rate(1)
@@ -89,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         status = response.status;
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns correct HTTP status', async () => {
         expect(status).to.be(200);

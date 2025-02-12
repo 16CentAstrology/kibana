@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PassThrough } from 'stream';
 
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 import { OptimizerUpdate } from '@kbn/optimizer';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createReplaceSerializer } from '@kbn/jest-serializers';
@@ -43,7 +44,6 @@ const defaultOptions: Options = {
   enabled: true,
   cache: true,
   dist: true,
-  oss: true,
   pluginPaths: ['/some/dir'],
   pluginScanDirs: ['/some-scan-path'],
   quiet: true,
@@ -85,7 +85,6 @@ it('uses options to create valid OptimizerConfig', () => {
     cache: false,
     dist: false,
     runExamples: false,
-    oss: false,
     pluginPaths: [],
     pluginScanDirs: [],
     repoRoot: '/foo/bar',
@@ -100,7 +99,6 @@ it('uses options to create valid OptimizerConfig', () => {
           "dist": true,
           "examples": true,
           "includeCoreBundle": true,
-          "oss": true,
           "pluginPaths": Array [
             "/some/dir",
           ],
@@ -117,7 +115,6 @@ it('uses options to create valid OptimizerConfig', () => {
           "dist": false,
           "examples": false,
           "includeCoreBundle": true,
-          "oss": false,
           "pluginPaths": Array [],
           "pluginScanDirs": Array [],
           "repoRoot": "/foo/bar",

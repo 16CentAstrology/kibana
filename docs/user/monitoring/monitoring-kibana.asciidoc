@@ -10,14 +10,15 @@ optionally collect metrics about {kib}.
 
 [IMPORTANT]
 =========================
-{metricbeat} is the recommended method for collecting and shipping monitoring
-data to a monitoring cluster.
+{agent} and {metricbeat} are the recommended methods for collecting and shipping
+monitoring data to a monitoring cluster.
 
 If you have previously configured legacy collection methods, you should migrate
-to using {metricbeat} collection methods. Use either {metricbeat} collection or
-legacy collection methods; do not use both.
+to using {agent} or {metricbeat} collection. Do not use legacy collection
+alongside other collection methods.
 
-For the recommended method, refer to <<monitoring-metricbeat>>.
+For more information, refer to <<monitoring-elastic-agent>> and
+<<monitoring-metricbeat>>.
 =========================
 
 The following method involves sending the metrics to the production cluster,
@@ -48,7 +49,8 @@ By default, if you are running {kib} locally, go to `http://localhost:5601/`.
 If {security-features} are enabled, log in.
 --
 
-... Open the main menu, then click *Stack Monitoring*. If data collection is
+... Go to the *Stack Monitoring* page using the 
+<<kibana-navigation-search,global search field>>. If data collection is
 disabled, you are prompted to turn it on. 
 
 ** From the Console or command line, set `xpack.monitoring.collection.enabled`

@@ -9,8 +9,9 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import {
   Aggregators,
-  Comparator,
   CountMetricExpressionParams,
+  CustomMetricExpressionParams,
+  MetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
 import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
@@ -18,11 +19,14 @@ import {
   EvaluatedRuleParams,
   evaluateRule,
 } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
-import { createFakeLogger } from './create_fake_logger';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { getElasticsearchMetricQuery } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/metric_query';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { DATES } from './utils/constants';
+import { createFakeLogger } from './utils/create_fake_logger';
 
 const { gauge, rate } = DATES['alert-test-data'];
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
@@ -37,10 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
         timeSize: 5,
         timeUnit: 'm',
         threshold: [1],
-        comparator: Comparator.GT_OR_EQ,
+        comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
         aggType: Aggregators.SUM,
         metric: 'value',
-      },
+      } as NonCountMetricExpressionParams,
     ],
   };
 
@@ -55,9 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
     inventoryDefaultView: 'default',
     metricsExplorerDefaultView: 'default',
     anomalyThreshold: 70,
-    fields: {
-      message: ['message'],
-    },
     logColumns: [
       {
         timestampColumn: {
@@ -91,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [10000],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -138,6 +139,73 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+        it('should alert with custom metric that is a document ratio', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
+                aggType: Aggregators.CUSTOM,
+                customMetrics: [
+                  { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
+                  { name: 'B', aggType: 'count' },
+                ],
+                equation: '((A + A) / (B + B)) * 100',
+                label: 'apache2 error ratio',
+              } as CustomMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'custom',
+                metric: 'apache2 error ratio',
+                label: 'apache2 error ratio',
+                customMetrics: [
+                  { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
+                  { name: 'B', aggType: 'count' },
+                ],
+                equation: '((A + A) / (B + B)) * 100',
+                currentValue: 36.195262024407754,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
       });
       describe('with group by', () => {
         it('should trigger on document count', async () => {
@@ -149,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [20000],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -205,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [20000],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -284,7 +352,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [1],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -367,7 +435,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [2],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -431,7 +499,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [0],
-                comparator: Comparator.LT_OR_EQ,
+                comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -526,7 +594,7 @@ export default function ({ getService }: FtrProviderContext) {
                   timeSize: 5,
                   timeUnit: 'm',
                   threshold: [0],
-                  comparator: Comparator.LT_OR_EQ,
+                  comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
                   aggType: Aggregators.COUNT,
                 } as CountMetricExpressionParams,
               ],
@@ -580,7 +648,7 @@ export default function ({ getService }: FtrProviderContext) {
                   timeSize: 5,
                   timeUnit: 'm',
                   threshold: [0],
-                  comparator: Comparator.LT_OR_EQ,
+                  comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
                   aggType: Aggregators.COUNT,
                 } as CountMetricExpressionParams,
               ],
@@ -687,7 +755,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [1],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -712,7 +780,7 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
-                currentValue: 4,
+                currentValue: 5,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
@@ -738,7 +806,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [0],
-                comparator: Comparator.LT_OR_EQ,
+                comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -803,7 +871,7 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'sum',
                 metric: 'value',
-                currentValue: 1,
+                currentValue: 151,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
@@ -832,7 +900,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [1],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -857,7 +925,7 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
-                currentValue: 2,
+                currentValue: 3,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
@@ -915,6 +983,30 @@ export default function ({ getService }: FtrProviderContext) {
           );
           expect(results).to.eql([
             {
+              dev: {
+                aggType: 'sum',
+                bucketKey: {
+                  groupBy0: 'dev',
+                },
+                comparator: '>=',
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+                currentValue: 150,
+                isNoData: false,
+                metric: 'value',
+                shouldFire: true,
+                shouldWarn: false,
+                threshold: [1],
+                timeSize: 5,
+                timeUnit: 'm',
+                timestamp: '2021-01-01T01:00:00.000Z',
+              },
               prod: {
                 timeSize: 5,
                 timeUnit: 'm',
@@ -994,7 +1086,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [100],
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 aggType: Aggregators.SUM,
                 metric: 'value',
               } as NonCountMetricExpressionParams,
@@ -1094,7 +1186,7 @@ export default function ({ getService }: FtrProviderContext) {
               timeSize: 1,
               timeUnit: 'm',
               threshold: [107374182400],
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               aggType: Aggregators.RATE,
               metric: 'value',
             } as NonCountMetricExpressionParams,
@@ -1147,7 +1239,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 1,
                 timeUnit: 'm',
                 threshold: [0.5],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.RATE,
                 metric: 'value',
               } as NonCountMetricExpressionParams,
@@ -1202,9 +1294,9 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 1,
                 timeUnit: 'm',
                 threshold: [1],
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 warningThreshold: [0.5],
-                warningComparator: Comparator.GT_OR_EQ,
+                warningComparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 aggType: Aggregators.RATE,
                 metric: 'value',
               } as NonCountMetricExpressionParams,
@@ -1249,6 +1341,120 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           ]);
+        });
+      });
+    });
+    describe('getElasticsearchMetricQuery', () => {
+      const index = 'test-index';
+      const getSearchParams = (aggType: string) =>
+        ({
+          aggType,
+          timeUnit: 'm',
+          threshold: [0],
+          comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
+          timeSize: 5,
+          ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
+        } as MetricExpressionParams);
+
+      before(async () => {
+        await esClient.index({
+          index,
+          body: {},
+        });
+      });
+      const aggs = ['avg', 'min', 'max', 'rate', 'cardinality', 'count'];
+
+      describe('querying the entire infrastructure', () => {
+        for (const aggType of aggs) {
+          it(`should work with the ${aggType} aggregator`, async () => {
+            const timeframe = {
+              start: moment().subtract(25, 'minutes').valueOf(),
+              end: moment().valueOf(),
+            };
+            const searchBody = getElasticsearchMetricQuery(
+              getSearchParams(aggType),
+              timeframe,
+              100,
+              true
+            );
+            const result = await esClient.search({
+              index,
+              body: searchBody,
+            });
+
+            expect(result.hits).to.be.ok();
+            if (aggType !== 'count') {
+              expect(result.aggregations).to.be.ok();
+            }
+          });
+        }
+        it('should work with a filterQuery', async () => {
+          const timeframe = {
+            start: moment().subtract(25, 'minutes').valueOf(),
+            end: moment().valueOf(),
+          };
+          const searchBody = getElasticsearchMetricQuery(
+            getSearchParams('avg'),
+            timeframe,
+            100,
+            true,
+            void 0,
+            '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
+          );
+          const result = await esClient.search({
+            index,
+            body: searchBody,
+          });
+
+          expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
+        });
+      });
+      describe('querying with a groupBy parameter', () => {
+        for (const aggType of aggs) {
+          it(`should work with the ${aggType} aggregator`, async () => {
+            const timeframe = {
+              start: moment().subtract(25, 'minutes').valueOf(),
+              end: moment().valueOf(),
+            };
+            const searchBody = getElasticsearchMetricQuery(
+              getSearchParams(aggType),
+              timeframe,
+              100,
+              true,
+              void 0,
+              'agent.id'
+            );
+            const result = await esClient.search({
+              index,
+              body: searchBody,
+            });
+
+            expect(result.hits).to.be.ok();
+            expect(result.aggregations).to.be.ok();
+          });
+        }
+        it('should work with a filterQuery', async () => {
+          const timeframe = {
+            start: moment().subtract(25, 'minutes').valueOf(),
+            end: moment().valueOf(),
+          };
+          const searchBody = getElasticsearchMetricQuery(
+            getSearchParams('avg'),
+            timeframe,
+            100,
+            true,
+            void 0,
+            'agent.id',
+            '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
+          );
+          const result = await esClient.search({
+            index,
+            body: searchBody,
+          });
+
+          expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
         });
       });
     });

@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-function isPromise(val: any): val is Promise<any> {
-  return val && typeof val === 'object' && 'then' in val && typeof val.then === 'function';
-}
+import { logPerf } from './log_perf';
 
 export enum LogLevel {
   trace = 0,
@@ -22,28 +21,9 @@ function getTimeString() {
 }
 
 export function createLogger(logLevel: LogLevel) {
-  function logPerf(name: string, start: bigint) {
-    // eslint-disable-next-line no-console
-    console.debug(
-      getTimeString(),
-      `${name}: ${Number(process.hrtime.bigint() - start) / 1000000}ms`
-    );
-  }
-  return {
-    perf: <T extends any>(name: string, cb: () => T): T => {
-      if (logLevel <= LogLevel.trace) {
-        const start = process.hrtime.bigint();
-        const val = cb();
-        if (isPromise(val)) {
-          val.then(() => {
-            logPerf(name, start);
-          });
-        } else {
-          logPerf(name, start);
-        }
-        return val;
-      }
-      return cb();
+  const logger: Logger = {
+    perf: (name, callback) => {
+      return logPerf(logger, logLevel, name, callback);
     },
     debug: (...args: any[]) => {
       if (logLevel <= LogLevel.debug) {
@@ -64,6 +44,13 @@ export function createLogger(logLevel: LogLevel) {
       }
     },
   };
+
+  return logger;
 }
 
-export type Logger = ReturnType<typeof createLogger>;
+export interface Logger {
+  perf: <T>(name: string, cb: () => T) => T;
+  debug: (...args: any[]) => void;
+  info: (...args: any[]) => void;
+  error: (...args: any[]) => void;
+}

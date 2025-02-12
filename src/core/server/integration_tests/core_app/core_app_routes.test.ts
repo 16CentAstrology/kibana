@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Root } from '@kbn/core-root-server-internal';
@@ -52,6 +53,11 @@ describe('Core app routes', () => {
     it('does not add the basePath if the path already contains it', async () => {
       const response = await request.get(root, '/base-path/foo/').expect(302);
       expect(response.get('location')).toEqual('/base-path/foo');
+    });
+
+    it('URI encodes redirect path', async () => {
+      const response = await request.get(root, '/%5Csome-path/').expect(302);
+      expect(response.get('location')).toEqual('/base-path/%5Csome-path');
     });
   });
 

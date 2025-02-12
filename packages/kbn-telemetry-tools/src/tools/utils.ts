@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 import {
   pick,
   pickBy,
@@ -20,13 +21,8 @@ import {
   isEqual,
 } from 'lodash';
 import * as path from 'path';
-import { readFile, writeFile } from 'fs';
-import { promisify } from 'util';
 import normalize from 'normalize-path';
 import { Optional } from '@kbn/utility-types';
-
-export const readFileAsync = promisify(readFile);
-export const writeFileAsync = promisify(writeFile);
 
 export function isPropertyWithKey(property: ts.Node, identifierName: string) {
   if (ts.isPropertyAssignment(property) || ts.isMethodDeclaration(property)) {
@@ -150,8 +146,16 @@ export function getResolvedModuleSourceFile(
   originalSource: ts.SourceFile,
   program: ts.Program,
   importedModuleName: string
-) {
-  const resolvedModule = (originalSource as any).resolvedModules.get(importedModuleName);
+): ts.SourceFile {
+  // Resolve the module name to get the resolved module name result
+  const resolvedModuleNameResult = ts.resolveModuleName(
+    importedModuleName,
+    originalSource.fileName,
+    program.getCompilerOptions(),
+    ts.sys
+  );
+
+  const resolvedModule = resolvedModuleNameResult.resolvedModule;
   if (!resolvedModule) {
     throw new Error(
       `Import for [${importedModuleName}] in [${originalSource.fileName}] could not be resolved by TypeScript`

@@ -9,21 +9,29 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.Semaphore",
+        "id": "def-common.Semaphore",
         "type": "Class",
         "tags": [],
         "label": "Semaphore",
         "description": [],
-        "path": "packages/kbn-std/src/semaphore.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.Semaphore.Unnamed",
+            "id": "def-common.Semaphore.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -31,13 +39,13 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-std/src/semaphore.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/std",
-                "id": "def-server.Semaphore.Unnamed.$1",
+                "id": "def-common.Semaphore.Unnamed.$1",
                 "type": "number",
                 "tags": [],
                 "label": "capacity",
@@ -45,7 +53,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-std/src/semaphore.ts",
+                "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -55,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.Semaphore.acquire",
+            "id": "def-common.Semaphore.acquire",
             "type": "Function",
             "tags": [],
             "label": "acquire",
@@ -65,7 +73,7 @@
               "OperatorFunction",
               "<T, T>"
             ],
-            "path": "packages/kbn-std/src/semaphore.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -73,7 +81,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.Semaphore.release",
+            "id": "def-common.Semaphore.release",
             "type": "Function",
             "tags": [],
             "label": "release",
@@ -81,7 +89,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-std/src/semaphore.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -94,7 +102,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.assertNever",
+        "id": "def-common.assertNever",
         "type": "Function",
         "tags": [],
         "label": "assertNever",
@@ -104,13 +112,13 @@
         "signature": [
           "(x: never) => never"
         ],
-        "path": "packages/kbn-std/src/assert_never.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/assert_never.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.assertNever.$1",
+            "id": "def-common.assertNever.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "x",
@@ -118,7 +126,7 @@
             "signature": [
               "never"
             ],
-            "path": "packages/kbn-std/src/assert_never.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/assert_never.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -129,7 +137,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncForEach",
+        "id": "def-common.asyncForEach",
         "type": "Function",
         "tags": [],
         "label": "asyncForEach",
@@ -143,13 +151,13 @@
           "AsyncMapFn",
           "<T, any>) => Promise<void>"
         ],
-        "path": "packages/kbn-std/src/iteration/for_each.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEach.$1",
+            "id": "def-common.asyncForEach.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -160,14 +168,14 @@
               "ObservableInput",
               "<T>"
             ],
-            "path": "packages/kbn-std/src/iteration/for_each.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEach.$2",
+            "id": "def-common.asyncForEach.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -178,7 +186,7 @@
               "AsyncMapFn",
               "<T, any>"
             ],
-            "path": "packages/kbn-std/src/iteration/for_each.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -189,7 +197,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncForEachWithLimit",
+        "id": "def-common.asyncForEachWithLimit",
         "type": "Function",
         "tags": [],
         "label": "asyncForEachWithLimit",
@@ -203,13 +211,13 @@
           "AsyncMapFn",
           "<T, any>) => Promise<void>"
         ],
-        "path": "packages/kbn-std/src/iteration/for_each.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$1",
+            "id": "def-common.asyncForEachWithLimit.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -220,14 +228,14 @@
               "ObservableInput",
               "<T>"
             ],
-            "path": "packages/kbn-std/src/iteration/for_each.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$2",
+            "id": "def-common.asyncForEachWithLimit.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -237,14 +245,14 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-std/src/iteration/for_each.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$3",
+            "id": "def-common.asyncForEachWithLimit.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -255,7 +263,7 @@
               "AsyncMapFn",
               "<T, any>"
             ],
-            "path": "packages/kbn-std/src/iteration/for_each.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -266,7 +274,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncMap",
+        "id": "def-common.asyncMap",
         "type": "Function",
         "tags": [],
         "label": "asyncMap",
@@ -280,13 +288,13 @@
           "AsyncMapFn",
           "<T1, T2>) => Promise<T2[]>"
         ],
-        "path": "packages/kbn-std/src/iteration/map.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMap.$1",
+            "id": "def-common.asyncMap.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -297,14 +305,14 @@
               "ObservableInput",
               "<T1>"
             ],
-            "path": "packages/kbn-std/src/iteration/map.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMap.$2",
+            "id": "def-common.asyncMap.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -315,7 +323,7 @@
               "AsyncMapFn",
               "<T1, T2>"
             ],
-            "path": "packages/kbn-std/src/iteration/map.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -326,7 +334,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncMapWithLimit",
+        "id": "def-common.asyncMapWithLimit",
         "type": "Function",
         "tags": [],
         "label": "asyncMapWithLimit",
@@ -340,13 +348,13 @@
           "AsyncMapFn",
           "<T1, T2>) => Promise<T2[]>"
         ],
-        "path": "packages/kbn-std/src/iteration/map.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$1",
+            "id": "def-common.asyncMapWithLimit.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -357,14 +365,14 @@
               "ObservableInput",
               "<T1>"
             ],
-            "path": "packages/kbn-std/src/iteration/map.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$2",
+            "id": "def-common.asyncMapWithLimit.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -374,14 +382,14 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-std/src/iteration/map.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$3",
+            "id": "def-common.asyncMapWithLimit.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -392,7 +400,7 @@
               "AsyncMapFn",
               "<T1, T2>"
             ],
-            "path": "packages/kbn-std/src/iteration/map.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -403,7 +411,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.deepFreeze",
+        "id": "def-common.deepFreeze",
         "type": "Function",
         "tags": [],
         "label": "deepFreeze",
@@ -414,20 +422,20 @@
           "(object: T) => ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.RecursiveReadonly",
+            "section": "def-common.RecursiveReadonly",
             "text": "RecursiveReadonly"
           },
           "<T>"
         ],
-        "path": "packages/kbn-std/src/deep_freeze.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/deep_freeze.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.deepFreeze.$1",
+            "id": "def-common.deepFreeze.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "object",
@@ -435,7 +443,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-std/src/deep_freeze.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/deep_freeze.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -446,7 +454,63 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.ensureNoUnsafeProperties",
+        "id": "def-common.ensureDeepObject",
+        "type": "Function",
+        "tags": [],
+        "label": "ensureDeepObject",
+        "description": [
+          "\nRecursively traverses through the object's properties and expands ones with\ndot-separated names into nested objects (eg. { a.b: 'c'} -> { a: { b: 'c' })."
+        ],
+        "signature": [
+          "(obj: any, path: string[]) => any"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.ensureDeepObject.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "obj",
+            "description": [
+              "Object to traverse through."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.ensureDeepObject.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "The current path of the traversal"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Same object instance with expanded properties."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.ensureNoUnsafeProperties",
         "type": "Function",
         "tags": [],
         "label": "ensureNoUnsafeProperties",
@@ -454,13 +518,13 @@
         "signature": [
           "(obj: any) => void"
         ],
-        "path": "packages/kbn-std/src/ensure_no_unsafe_properties.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/ensure_no_unsafe_properties.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.ensureNoUnsafeProperties.$1",
+            "id": "def-common.ensureNoUnsafeProperties.$1",
             "type": "Any",
             "tags": [],
             "label": "obj",
@@ -468,7 +532,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-std/src/ensure_no_unsafe_properties.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/ensure_no_unsafe_properties.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -479,7 +543,40 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.ensureValidObjectPath",
+        "type": "Function",
+        "tags": [],
+        "label": "ensureValidObjectPath",
+        "description": [],
+        "signature": [
+          "(path: string[]) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.ensureValidObjectPath.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -489,13 +586,13 @@
         "signature": [
           "(obj: CFG, path: [A, B, C, D, E]) => CFG[A][B][C][D][E]"
         ],
-        "path": "packages/kbn-std/src/get.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -503,14 +600,14 @@
             "signature": [
               "CFG"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -518,7 +615,7 @@
             "signature": [
               "[A, B, C, D, E]"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -529,7 +626,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -537,13 +634,13 @@
         "signature": [
           "(obj: CFG, path: [A, B, C, D]) => CFG[A][B][C][D]"
         ],
-        "path": "packages/kbn-std/src/get.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -551,14 +648,14 @@
             "signature": [
               "CFG"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -566,7 +663,7 @@
             "signature": [
               "[A, B, C, D]"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -577,7 +674,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -585,13 +682,13 @@
         "signature": [
           "(obj: CFG, path: [A, B, C]) => CFG[A][B][C]"
         ],
-        "path": "packages/kbn-std/src/get.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -599,14 +696,14 @@
             "signature": [
               "CFG"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -614,7 +711,7 @@
             "signature": [
               "[A, B, C]"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -625,7 +722,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -633,13 +730,13 @@
         "signature": [
           "(obj: CFG, path: [A, B]) => CFG[A][B]"
         ],
-        "path": "packages/kbn-std/src/get.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -647,14 +744,14 @@
             "signature": [
               "CFG"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -662,7 +759,7 @@
             "signature": [
               "[A, B]"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -673,7 +770,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -681,13 +778,13 @@
         "signature": [
           "(obj: CFG, path: A | [A]) => CFG[A]"
         ],
-        "path": "packages/kbn-std/src/get.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -695,14 +792,14 @@
             "signature": [
               "CFG"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "path",
@@ -710,7 +807,7 @@
             "signature": [
               "A | [A]"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -721,7 +818,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -729,13 +826,13 @@
         "signature": [
           "(obj: CFG, path: string | string[]) => any"
         ],
-        "path": "packages/kbn-std/src/get.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -743,14 +840,14 @@
             "signature": [
               "CFG"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "path",
@@ -758,7 +855,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/kbn-std/src/get.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -769,7 +866,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.getFlattenedObject",
+        "id": "def-common.getFlattenedObject",
         "type": "Function",
         "tags": [],
         "label": "getFlattenedObject",
@@ -779,13 +876,13 @@
         "signature": [
           "(rootValue: Record<string, any>) => { [key: string]: any; }"
         ],
-        "path": "packages/kbn-std/src/get_flattened_object.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/get_flattened_object.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.getFlattenedObject.$1",
+            "id": "def-common.getFlattenedObject.$1",
             "type": "Object",
             "tags": [],
             "label": "rootValue",
@@ -793,7 +890,7 @@
             "signature": [
               "Record<string, any>"
             ],
-            "path": "packages/kbn-std/src/get_flattened_object.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/get_flattened_object.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -804,7 +901,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.getUrlOrigin",
+        "id": "def-common.getUrlOrigin",
         "type": "Function",
         "tags": [],
         "label": "getUrlOrigin",
@@ -814,13 +911,13 @@
         "signature": [
           "(url: string) => string | null"
         ],
-        "path": "packages/kbn-std/src/url.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.getUrlOrigin.$1",
+            "id": "def-common.getUrlOrigin.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -828,7 +925,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -839,7 +936,57 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.isPromise",
+        "id": "def-common.isInternalURL",
+        "type": "Function",
+        "tags": [],
+        "label": "isInternalURL",
+        "description": [
+          "\nDetermine if url is outside of this Kibana install."
+        ],
+        "signature": [
+          "(url: string, basePath: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/is_internal_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.isInternalURL.$1",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/is_internal_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.isInternalURL.$2",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/is_internal_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.isPromise",
         "type": "Function",
         "tags": [],
         "label": "isPromise",
@@ -847,13 +994,13 @@
         "signature": [
           "(maybePromise: T | Promise<T>) => boolean"
         ],
-        "path": "packages/kbn-std/src/promise.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.isPromise.$1",
+            "id": "def-common.isPromise.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "maybePromise",
@@ -861,7 +1008,7 @@
             "signature": [
               "T | Promise<T>"
             ],
-            "path": "packages/kbn-std/src/promise.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -872,7 +1019,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.isRelativeUrl",
+        "id": "def-common.isRelativeUrl",
         "type": "Function",
         "tags": [],
         "label": "isRelativeUrl",
@@ -882,13 +1029,13 @@
         "signature": [
           "(candidatePath: string) => boolean"
         ],
-        "path": "packages/kbn-std/src/url.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.isRelativeUrl.$1",
+            "id": "def-common.isRelativeUrl.$1",
             "type": "string",
             "tags": [],
             "label": "candidatePath",
@@ -896,7 +1043,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -907,7 +1054,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.map$",
+        "id": "def-common.map$",
         "type": "Function",
         "tags": [],
         "label": "map$",
@@ -923,13 +1070,13 @@
           "Observable",
           "<T2>"
         ],
-        "path": "packages/kbn-std/src/iteration/observable.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.map$.$1",
+            "id": "def-common.map$.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -940,14 +1087,14 @@
               "ObservableInput",
               "<T1>"
             ],
-            "path": "packages/kbn-std/src/iteration/observable.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.map$.$2",
+            "id": "def-common.map$.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -958,7 +1105,7 @@
               "AsyncMapFn",
               "<T1, T2>"
             ],
-            "path": "packages/kbn-std/src/iteration/observable.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -969,7 +1116,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.mapToObject",
+        "id": "def-common.mapToObject",
         "type": "Function",
         "tags": [],
         "label": "mapToObject",
@@ -977,13 +1124,13 @@
         "signature": [
           "(map: ReadonlyMap<string, V>) => Record<string, V>"
         ],
-        "path": "packages/kbn-std/src/map_to_object.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/map_to_object.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapToObject.$1",
+            "id": "def-common.mapToObject.$1",
             "type": "Object",
             "tags": [],
             "label": "map",
@@ -991,7 +1138,7 @@
             "signature": [
               "ReadonlyMap<string, V>"
             ],
-            "path": "packages/kbn-std/src/map_to_object.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/map_to_object.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1002,7 +1149,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.mapWithLimit$",
+        "id": "def-common.mapWithLimit$",
         "type": "Function",
         "tags": [],
         "label": "mapWithLimit$",
@@ -1018,13 +1165,13 @@
           "Observable",
           "<T2>"
         ],
-        "path": "packages/kbn-std/src/iteration/observable.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$1",
+            "id": "def-common.mapWithLimit$.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -1035,14 +1182,14 @@
               "ObservableInput",
               "<T1>"
             ],
-            "path": "packages/kbn-std/src/iteration/observable.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$2",
+            "id": "def-common.mapWithLimit$.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -1052,14 +1199,14 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-std/src/iteration/observable.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$3",
+            "id": "def-common.mapWithLimit$.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -1070,7 +1217,7 @@
               "AsyncMapFn",
               "<T1, T2>"
             ],
-            "path": "packages/kbn-std/src/iteration/observable.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1081,7 +1228,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1091,13 +1238,13 @@
         "signature": [
           "(baseObj: TBase, source1: TSource1) => TBase & TSource1"
         ],
-        "path": "packages/kbn-std/src/merge.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -1105,14 +1252,14 @@
             "signature": [
               "TBase"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "source1",
@@ -1120,7 +1267,7 @@
             "signature": [
               "TSource1"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1131,7 +1278,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1139,13 +1286,13 @@
         "signature": [
           "(baseObj: TBase, overrideObj: TSource1, overrideObj2: TSource2) => TBase & TSource1 & TSource2"
         ],
-        "path": "packages/kbn-std/src/merge.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -1153,14 +1300,14 @@
             "signature": [
               "TBase"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj",
@@ -1168,14 +1315,14 @@
             "signature": [
               "TSource1"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$3",
+            "id": "def-common.merge.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj2",
@@ -1183,7 +1330,7 @@
             "signature": [
               "TSource2"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1194,7 +1341,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1202,13 +1349,13 @@
         "signature": [
           "(baseObj: TBase, overrideObj: TSource1, overrideObj2: TSource2) => TBase & TSource1 & TSource2 & TSource3"
         ],
-        "path": "packages/kbn-std/src/merge.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -1216,14 +1363,14 @@
             "signature": [
               "TBase"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj",
@@ -1231,14 +1378,14 @@
             "signature": [
               "TSource1"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$3",
+            "id": "def-common.merge.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj2",
@@ -1246,7 +1393,7 @@
             "signature": [
               "TSource2"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1257,7 +1404,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1265,13 +1412,13 @@
         "signature": [
           "(baseObj: Record<string, any>, sources: Record<string, any>[]) => TReturn"
         ],
-        "path": "packages/kbn-std/src/merge.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Object",
             "tags": [],
             "label": "baseObj",
@@ -1279,14 +1426,14 @@
             "signature": [
               "Record<string, any>"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Array",
             "tags": [],
             "label": "sources",
@@ -1294,7 +1441,7 @@
             "signature": [
               "Record<string, any>[]"
             ],
-            "path": "packages/kbn-std/src/merge.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1305,7 +1452,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.modifyUrl",
+        "id": "def-common.modifyUrl",
         "type": "Function",
         "tags": [],
         "label": "modifyUrl",
@@ -1316,28 +1463,28 @@
           "(url: string, urlModifier: (urlParts: ",
           {
             "pluginId": "@kbn/std",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnStdPluginApi",
-            "section": "def-server.URLMeaningfulParts",
+            "section": "def-common.URLMeaningfulParts",
             "text": "URLMeaningfulParts"
           },
           ") => void | Partial<",
           {
             "pluginId": "@kbn/std",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnStdPluginApi",
-            "section": "def-server.URLMeaningfulParts",
+            "section": "def-common.URLMeaningfulParts",
             "text": "URLMeaningfulParts"
           },
           ">) => string"
         ],
-        "path": "packages/kbn-std/src/url.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.modifyUrl.$1",
+            "id": "def-common.modifyUrl.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -1347,14 +1494,14 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.modifyUrl.$2",
+            "id": "def-common.modifyUrl.$2",
             "type": "Function",
             "tags": [],
             "label": "urlModifier",
@@ -1365,22 +1512,22 @@
               "(urlParts: ",
               {
                 "pluginId": "@kbn/std",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnStdPluginApi",
-                "section": "def-server.URLMeaningfulParts",
+                "section": "def-common.URLMeaningfulParts",
                 "text": "URLMeaningfulParts"
               },
               ") => void | Partial<",
               {
                 "pluginId": "@kbn/std",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnStdPluginApi",
-                "section": "def-server.URLMeaningfulParts",
+                "section": "def-common.URLMeaningfulParts",
                 "text": "URLMeaningfulParts"
               },
               ">"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1393,7 +1540,72 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.pick",
+        "id": "def-common.parseNextURL",
+        "type": "Function",
+        "tags": [],
+        "label": "parseNextURL",
+        "description": [
+          "\nParse the url value from query param. By default\n\nBy default query param is set to next."
+        ],
+        "signature": [
+          "(href: string, basePath: string, nextUrlQueryParam: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/parse_next_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.parseNextURL.$1",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/parse_next_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.parseNextURL.$2",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/parse_next_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.parseNextURL.$3",
+            "type": "string",
+            "tags": [],
+            "label": "nextUrlQueryParam",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/parse_next_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.pick",
         "type": "Function",
         "tags": [],
         "label": "pick",
@@ -1401,13 +1613,13 @@
         "signature": [
           "(obj: T, keys: readonly K[]) => Pick<T, K>"
         ],
-        "path": "packages/kbn-std/src/pick.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/pick.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.pick.$1",
+            "id": "def-common.pick.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -1415,14 +1627,14 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-std/src/pick.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/pick.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.pick.$2",
+            "id": "def-common.pick.$2",
             "type": "Object",
             "tags": [],
             "label": "keys",
@@ -1430,7 +1642,7 @@
             "signature": [
               "readonly K[]"
             ],
-            "path": "packages/kbn-std/src/pick.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/pick.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1441,46 +1653,31 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.unset",
+        "id": "def-common.stripVersionQualifier",
         "type": "Function",
         "tags": [],
-        "label": "unset",
+        "label": "stripVersionQualifier",
         "description": [
-          "\nUnset a (potentially nested) key from given object.\nThis mutates the original object.\n"
+          "\nCoerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha)\nto regular semver (x.y.z)."
         ],
         "signature": [
-          "(obj: OBJ, atPath: string) => void"
+          "(version: string) => string"
         ],
-        "path": "packages/kbn-std/src/unset.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/strip_version_qualifier.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.unset.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "obj",
-            "description": [],
-            "signature": [
-              "OBJ"
-            ],
-            "path": "packages/kbn-std/src/unset.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/std",
-            "id": "def-server.unset.$2",
+            "id": "def-common.stripVersionQualifier.$1",
             "type": "string",
             "tags": [],
-            "label": "atPath",
+            "label": "version",
             "description": [],
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-std/src/unset.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/strip_version_qualifier.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1491,7 +1688,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.withTimeout",
+        "id": "def-common.withTimeout",
         "type": "Function",
         "tags": [],
         "label": "withTimeout",
@@ -1499,24 +1696,24 @@
         "signature": [
           "({\n  promise,\n  timeoutMs,\n}: { promise: Promise<T>; timeoutMs: number; }) => Promise<{ timedout: true; } | { timedout: false; value: T; }>"
         ],
-        "path": "packages/kbn-std/src/promise.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.withTimeout.$1",
+            "id": "def-common.withTimeout.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  promise,\n  timeoutMs,\n}",
             "description": [],
-            "path": "packages/kbn-std/src/promise.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/std",
-                "id": "def-server.withTimeout.$1.promise",
+                "id": "def-common.withTimeout.$1.promise",
                 "type": "Object",
                 "tags": [],
                 "label": "promise",
@@ -1524,18 +1721,18 @@
                 "signature": [
                   "Promise<T>"
                 ],
-                "path": "packages/kbn-std/src/promise.ts",
+                "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/std",
-                "id": "def-server.withTimeout.$1.timeoutMs",
+                "id": "def-common.withTimeout.$1.timeoutMs",
                 "type": "number",
                 "tags": [],
                 "label": "timeoutMs",
                 "description": [],
-                "path": "packages/kbn-std/src/promise.ts",
+                "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1549,20 +1746,20 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.URLMeaningfulParts",
+        "id": "def-common.URLMeaningfulParts",
         "type": "Interface",
         "tags": [],
         "label": "URLMeaningfulParts",
         "description": [
           "\nWe define our own typings because the current version of @types/node\ndeclares properties to be optional \"hostname?: string\".\nAlthough, parse call returns \"hostname: null | string\".\n"
         ],
-        "path": "packages/kbn-std/src/url.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.auth",
+            "id": "def-common.URLMeaningfulParts.auth",
             "type": "CompoundType",
             "tags": [],
             "label": "auth",
@@ -1570,13 +1767,13 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.hash",
+            "id": "def-common.URLMeaningfulParts.hash",
             "type": "CompoundType",
             "tags": [],
             "label": "hash",
@@ -1584,13 +1781,13 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.hostname",
+            "id": "def-common.URLMeaningfulParts.hostname",
             "type": "CompoundType",
             "tags": [],
             "label": "hostname",
@@ -1598,13 +1795,13 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.pathname",
+            "id": "def-common.URLMeaningfulParts.pathname",
             "type": "CompoundType",
             "tags": [],
             "label": "pathname",
@@ -1612,13 +1809,13 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.protocol",
+            "id": "def-common.URLMeaningfulParts.protocol",
             "type": "CompoundType",
             "tags": [],
             "label": "protocol",
@@ -1626,13 +1823,13 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.slashes",
+            "id": "def-common.URLMeaningfulParts.slashes",
             "type": "CompoundType",
             "tags": [],
             "label": "slashes",
@@ -1640,13 +1837,13 @@
             "signature": [
               "boolean | null | undefined"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.port",
+            "id": "def-common.URLMeaningfulParts.port",
             "type": "CompoundType",
             "tags": [],
             "label": "port",
@@ -1654,13 +1851,13 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.query",
+            "id": "def-common.URLMeaningfulParts.query",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -1669,7 +1866,7 @@
               "ParsedQuery",
               "<string>"
             ],
-            "path": "packages/kbn-std/src/url.ts",
+            "path": "src/platform/packages/shared/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1681,7 +1878,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.Freezable",
+        "id": "def-common.Freezable",
         "type": "Type",
         "tags": [],
         "label": "Freezable",
@@ -1689,20 +1886,12 @@
         "signature": [
           "any[] | { [k: string]: any; }"
         ],
-        "path": "packages/kbn-std/src/deep_freeze.ts",
+        "path": "src/platform/packages/shared/kbn-std/src/deep_freeze.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

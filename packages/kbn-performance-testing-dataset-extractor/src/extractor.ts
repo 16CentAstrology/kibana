@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs/promises';
@@ -42,7 +43,8 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     username: client.username,
     password: client.password,
   };
-  const { journeyName, scalabilitySetup, testData, buildId, withoutStaticResources } = param;
+  const { journeyName, configPath, scalabilitySetup, testData, buildId, withoutStaticResources } =
+    param;
   log.info(
     `Searching transactions with 'labels.testBuildId=${buildId}' and 'labels.journeyName=${journeyName}'`
   );
@@ -87,6 +89,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     await saveFile(
       {
         journeyName,
+        configPath,
         kibanaVersion,
         scalabilitySetup,
         testData,
@@ -101,6 +104,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   await saveFile(
     {
       journeyName,
+      configPath,
       kibanaVersion,
       testData,
       streams: esStreams,

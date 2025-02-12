@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
-import type { ChangePoint, ChangePointGroup } from '@kbn/ml-agg-utils';
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
+import type { FetchFieldCandidatesResponse } from '@kbn/aiops-log-rate-analysis/queries/fetch_field_candidates';
 
-export interface TestData {
+import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
+
+export interface TestData<T extends ApiVersion> {
   testName: string;
   esArchive?: string;
-  dataGenerator?: string;
-  requestBody: ApiExplainLogRateSpikes['body'];
+  dataGenerator?: LogRateAnalysisDataGenerator;
+  requestBody: AiopsLogRateAnalysisSchema<T>;
   expected: {
-    chunksLength: number;
-    actionsLength: number;
     noIndexChunksLength: number;
     noIndexActionsLength: number;
-    changePointFilter: 'add_change_points';
-    groupFilter: 'add_change_point_group';
-    groupHistogramFilter: 'add_change_point_group_histogram';
-    histogramFilter: 'add_change_points_histogram';
-    errorFilter: 'add_error';
-    changePoints: ChangePoint[];
-    groups: ChangePointGroup[];
+    significantItems: SignificantItem[];
+    groups: SignificantItemGroup[];
+    histogramActionsLength: number;
     histogramLength: number;
+    fieldCandidates: FetchFieldCandidatesResponse;
   };
 }

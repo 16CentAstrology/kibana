@@ -1,23 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { captureErrorMock } from './router.test.mocks';
 
 import { Stream } from 'stream';
 import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -30,11 +39,12 @@ const setupDeps = {
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
-  server = createHttpServer({ logger });
+  server = createHttpService({ logger });
   await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
 afterEach(async () => {
+  captureErrorMock.mockReset();
   await server.stop();
 });
 
@@ -330,15 +340,15 @@ describe('Options', () => {
         let i = 0;
         const intervalId = setInterval(() => {
           if (i < body.length) {
-            request.write(body[i++]);
+            void request.write(body[i++]);
           } else {
             clearInterval(intervalId);
-            request.end((err, res) => {
+            void request.end((err, res) => {
               resolve(res);
             });
           }
         }, interval);
-        request.on('error', (err) => {
+        void request.on('error', (err) => {
           clearInterval(intervalId);
           reject(err);
         });
@@ -405,7 +415,7 @@ describe('Options', () => {
     });
 
     describe('idleSocket', () => {
-      it.skip('should timeout if payload sending has too long of an idle period', async () => {
+      it('should timeout if payload sending has too long of an idle period', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
@@ -417,7 +427,7 @@ describe('Options', () => {
               body: {
                 accepts: ['application/json'],
               },
-              timeout: { idleSocket: 10 },
+              timeout: { idleSocket: 5 },
             },
           },
           async (context, req, res) => {
@@ -565,6 +575,7 @@ describe('Handler', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => {
       throw new Error('unexpected error');
     });
+
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -572,25 +583,37 @@ describe('Handler', () => {
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
     );
-    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            [Error: unexpected error],
-          ],
-        ]
-    `);
+
+    const [message] = loggingSystemMock.collect(logger).error[0];
+    expect(message).toEqual('500 Server Error');
+  });
+
+  it('captures the error if handler throws', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    const error = new Error(`some error`);
+    router.get({ path: '/', validate: false }, (context, req, res) => {
+      throw error;
+    });
+    await server.start();
+
+    await supertest(innerServer.listener).get('/').expect(500);
+
+    expect(captureErrorMock).toHaveBeenCalledTimes(1);
+    expect(captureErrorMock).toHaveBeenCalledWith(error);
   });
 
   it('returns 500 Server error if handler throws Boom error', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
+    router.get({ path: '/{query}', validate: false }, (context, req, res) => {
       throw Boom.unauthorized();
     });
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/').expect(500);
+    const result = await supertest(innerServer.listener).get('/some-data').expect(500);
 
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
@@ -598,10 +621,25 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unauthorized],
+          "500 Server Error",
+          Object {
+            "error": Object {
+              "message": "Unauthorized",
+            },
+            "http": Object {
+              "request": Object {
+                "method": "get",
+                "path": "/{query}",
+              },
+              "response": Object {
+                "status_code": 500,
+              },
+            },
+          },
         ],
       ]
     `);
+    expect(captureErrorMock).toHaveBeenCalledTimes(1);
   });
 
   it('returns 500 Server error if handler returns unexpected result', async () => {
@@ -619,38 +657,137 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
+          "500 Server Error",
+          Object {
+            "error": Object {
+              "message": "Unexpected result from Route Handler. Expected KibanaResponse, but given: string.",
+            },
+            "http": Object {
+              "request": Object {
+                "method": "get",
+                "path": "/",
+              },
+              "response": Object {
+                "status_code": 500,
+              },
+            },
+          },
         ],
       ]
     `);
   });
 
-  it('returns 400 Bad request if request validation failed', async () => {
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
+  describe('returns 400 Bad request if request validation failed', () => {
+    it('@kbn/config-schema', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
 
-    router.get(
-      {
-        path: '/',
-        validate: {
-          query: schema.object({
-            page: schema.number(),
-          }),
+      router.get(
+        {
+          path: '/',
+          validate: {
+            query: schema.object({
+              page: schema.number(),
+            }),
+          },
         },
-      },
-      (context, req, res) => res.noContent()
-    );
-    await server.start();
+        (context, req, res) => res.noContent()
+      );
+      await server.start();
 
-    const result = await supertest(innerServer.listener)
-      .get('/')
-      .query({ page: 'one' })
-      .expect(400);
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .query({ page: 'one' })
+        .expect(400);
 
-    expect(result.body).toEqual({
-      error: 'Bad Request',
-      message: '[request query.page]: expected value of type [number] but got [string]',
-      statusCode: 400,
+      expect(result.body).toEqual({
+        error: 'Bad Request',
+        message: '[request query.page]: expected value of type [number] but got [string]',
+        statusCode: 400,
+      });
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+              Array [
+                Array [
+                  "400 Bad Request",
+                  Object {
+                    "error": Object {
+                      "message": "[request query.page]: expected value of type [number] but got [string]",
+                    },
+                    "http": Object {
+                      "request": Object {
+                        "method": "get",
+                        "path": "/",
+                      },
+                      "response": Object {
+                        "status_code": 400,
+                      },
+                    },
+                  },
+                ],
+              ]
+          `);
+    });
+
+    it('@kbn/zod', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.get(
+        {
+          path: '/',
+          validate: {
+            query: z.object({
+              page: z.number(),
+            }),
+          },
+        },
+        (context, req, res) => res.noContent()
+      );
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .query({ page: 'one' })
+        .expect(400);
+
+      expect(result.body).toEqual({
+        error: 'Bad Request',
+        message: expect.stringMatching(/Expected number, received string/),
+        statusCode: 400,
+      });
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "400 Bad Request",
+            Object {
+              "error": Object {
+                "message": "[
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"number\\",
+            \\"received\\": \\"string\\",
+            \\"path\\": [
+              \\"page\\"
+            ],
+            \\"message\\": \\"Expected number, received string\\"
+          }
+        ]",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 400,
+                },
+              },
+            },
+          ],
+        ]
+      `);
     });
   });
 
@@ -703,6 +840,82 @@ describe('Handler', () => {
     await supertest(innerServer.listener).post('/').type('json').send('12').expect(200);
 
     expect(body).toEqual(12);
+  });
+
+  it('adds versioned header v2023-10-31 to public, unversioned routes', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.post(
+      {
+        path: '/public',
+        validate: { body: schema.object({ ok: schema.boolean() }) },
+        options: {
+          access: 'public',
+        },
+      },
+      (context, req, res) => {
+        if (req.body.ok) {
+          return res.ok({ body: 'ok', headers: { test: 'this' } });
+        }
+        return res.customError({ statusCode: 499, body: 'custom error' });
+      }
+    );
+    router.post(
+      {
+        path: '/internal',
+        validate: { body: schema.object({ ok: schema.boolean() }) },
+      },
+      (context, req, res) => {
+        return res.ok({ body: 'ok', headers: { test: 'this' } });
+      }
+    );
+    await server.start();
+
+    // Includes header if validation fails
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: null })
+        .expect(400);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Includes header if custom error
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: false })
+        .expect(499);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Includes header if OK
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: true })
+        .expect(200);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Internal unversioned routes do not include the header for OK
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/internal')
+        .send({ ok: true })
+        .expect(200);
+      expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Internal unversioned routes do not include the header for validation failures
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/internal')
+        .send({ ok: null })
+        .expect(400);
+      expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
   });
 });
 
@@ -1125,7 +1338,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected 'location' header to be set],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "expected 'location' header to be set",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1259,6 +1486,74 @@ describe('Response factory', () => {
               bar: schema.string(),
               baz: schema.number(),
             }),
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123', // Automatic casting happens
+        })
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 'test', // Can't cast it into number
+        })
+        .expect(400)
+        .then((res) => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.baz]: expected value of type [number] but got [string]',
+            statusCode: 400,
+          });
+        });
+    });
+
+    it('@kbn/config-schema validation in request.body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      const runtimeValidation = schema.object({
+        bar: schema.string(),
+        baz: schema.number(),
+      });
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            request: {
+              body: runtimeValidation,
+            },
+            response: {
+              200: {
+                body: () => runtimeValidation,
+              },
+            },
           },
         },
         (context, req, res) => {
@@ -1531,7 +1826,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "Unexpected Http status code. Expected from 400 to 599, but given: 200",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1600,7 +1909,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected 'location' header to be set],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "expected 'location' header to be set",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1740,7 +2063,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected error message to be provided],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "expected error message to be provided",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1766,7 +2103,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected error message to be provided],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "expected error message to be provided",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1791,7 +2142,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: options.statusCode is expected to be set. given options: undefined],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "options.statusCode is expected to be set. given options: undefined",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1816,7 +2181,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "Unexpected Http status code. Expected from 100 to 599, but given: 20.",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1891,7 +2270,12 @@ describe('registerRouterAfterListening', () => {
 
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
-    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
+      env,
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
+    });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
     });
@@ -1923,7 +2307,12 @@ describe('registerRouterAfterListening', () => {
 
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
-    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
+      env,
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
+    });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
     });

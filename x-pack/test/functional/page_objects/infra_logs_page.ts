@@ -5,21 +5,7 @@
  * 2.0.
  */
 
-import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
-import { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
-import querystring from 'querystring';
-import { encode } from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
-
-export interface TabsParams {
-  stream: {
-    logPosition?: Partial<LogPositionUrlState>;
-    flyoutOptions?: Partial<FlyoutOptionsUrlState>;
-  };
-  settings: never;
-  'log-categories': any;
-  'log-rate': any;
-}
 
 export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -30,24 +16,11 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
       await pageObjects.common.navigateToApp('infraLogs');
     },
 
-    async navigateToTab<T extends LogsUiTab>(logsUiTab: T, params?: TabsParams[T]) {
-      let qs = '';
-      if (params) {
-        const parsedParams: Record<string, string> = {};
-
-        for (const key in params) {
-          if (params.hasOwnProperty(key)) {
-            const value = params[key];
-            parsedParams[key] = encode(value);
-          }
-        }
-        qs = '?' + querystring.stringify(parsedParams);
-      }
-
+    async navigateToTab<T extends LogsUiTab>(logsUiTab: T) {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraLogs',
         `/${logsUiTab}`,
-        qs,
+        '',
         { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
       );
     },
@@ -58,4 +31,4 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
   };
 }
 
-type LogsUiTab = 'log-categories' | 'log-rate' | 'settings' | 'stream';
+type LogsUiTab = 'log-categories' | 'log-rate';

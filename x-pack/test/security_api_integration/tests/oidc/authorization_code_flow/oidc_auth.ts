@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import url from 'url';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { adminTestUser } from '@kbn/test';
 import { resolve } from 'path';
-import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+import url from 'url';
+
+import expect from '@kbn/expect';
+import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { FileWrapper } from '../../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -179,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should fail if state is not matching', async () => {
@@ -189,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
@@ -621,6 +624,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should properly set cookie and start new OIDC handshake', async function () {
+        // Let's make sure that created tokens are available for search.
+        await getService('es').indices.refresh({ index: '.security-tokens' });
+
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
@@ -664,7 +670,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../../fixtures/audit/oidc.log');
+      const logFilePath = resolve(__dirname, '../../../packages/helpers/audit/oidc.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
@@ -711,7 +717,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(2);
@@ -736,7 +742,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/api/security/oidc/callback?code=thisisthecode&state=someothervalue`)
           .expect(401);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(1);

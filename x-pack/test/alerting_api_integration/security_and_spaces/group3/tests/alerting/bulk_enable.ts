@@ -8,9 +8,19 @@
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getUnauthorizedErrorMessage,
+} from '../../../../common/lib';
 
-const defaultSuccessfulResponse = { total: 1, rules: [], errors: [], taskIdsFailedToBeEnabled: [] };
+const defaultSuccessfulResponse = {
+  total: 1,
+  rules: [],
+  errors: [],
+  task_ids_failed_to_be_enabled: [],
+};
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -34,14 +44,13 @@ export default ({ getService }: FtrProviderContext) => {
       const { user, space } = scenario;
 
       describe(scenario.id, () => {
-        afterEach(() => objectRemover.removeAll());
-
         it('should handle bulk enable of one rule appropriately based on id', async () => {
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send({ ...getTestRuleData(), enabled: false })
             .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -58,16 +67,14 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
@@ -79,35 +86,39 @@ export default ({ getService }: FtrProviderContext) => {
                 rules: [
                   {
                     id: response.body.rules[0].id,
-                    notifyWhen: 'onThrottleInterval',
+                    notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
                     tags: ['foo'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
-                    alertTypeId: 'test.noop',
-                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
-                    createdBy: 'elastic',
-                    updatedBy: response.body.rules[0].updatedBy,
-                    muteAll: false,
-                    mutedInstanceIds: [],
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
                     schedule: { interval: '1m' },
                     actions: [],
                     params: {},
-                    snoozeSchedule: [],
-                    updatedAt: response.body.rules[0].updatedAt,
-                    createdAt: response.body.rules[0].createdAt,
-                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
-                    executionStatus: {
-                      lastDuration: 0,
-                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
                       status: 'pending',
                     },
                     monitoring: response.body.rules[0].monitoring,
                   },
                 ],
                 errors: [],
-                taskIdsFailedToBeEnabled: [],
+                task_ids_failed_to_be_enabled: [],
               });
               break;
             default:
@@ -126,6 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -142,17 +154,18 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message:
-                  'Unauthorized to bulkEnable a "test.restricted-noop" rule for "alertsRestrictedFixture"',
+                message: getUnauthorizedErrorMessage(
+                  'bulkEnable',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
@@ -162,61 +175,52 @@ export default ({ getService }: FtrProviderContext) => {
                 message: 'No rules found for bulk enable',
               });
               expect(response.statusCode).to.eql(400);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
-              expect(response.statusCode).to.eql(200);
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
-        it('should handle enable alert request appropriately when consumer is not the producer', async () => {
-          const { body: createdRule } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                rule_type_id: 'test.restricted-noop',
-                consumer: 'alertsFixture',
-              })
-            )
-            .expect(200);
-
-          const response = await supertestWithoutAuth
-            .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
-            .set('kbn-xsrf', 'foo')
-            .send({ ids: [createdRule.id] })
-            .auth(user.username, user.password);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
               expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
-                statusCode: 403,
+                ...defaultSuccessfulResponse,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsRestrictedFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.restricted-noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
               });
-              expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
-              break;
-            case 'space_1_all at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'global_read at space1':
-              expect(response.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message: 'No rules found for bulk enable',
-              });
-              expect(response.statusCode).to.eql(400);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
-              break;
-            case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -235,6 +239,7 @@ export default ({ getService }: FtrProviderContext) => {
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -251,22 +256,62 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule by "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alerts',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -280,10 +325,13 @@ export default ({ getService }: FtrProviderContext) => {
               supertest
                 .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ tags: ['multiple-rules-edit'] }))
+                .send(getTestRuleData({ tags: ['multiple-rules-edit-with-ids'] }))
                 .expect(200)
             )
           );
+          rules.map((rule) => {
+            objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
+          });
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -300,30 +348,139 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-ids'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                  {
+                    id: response.body.rules[1].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-ids'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[1].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[1].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[1].updated_at,
+                    created_at: response.body.rules[1].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[1].scheduled_task_id,
+                    ...(response.body.rules[1].last_run
+                      ? { last_run: response.body.rules[1].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[1].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[1].next_run
+                      ? { next_run: response.body.rules[1].next_run }
+                      : {}),
+                    monitoring: response.body.rules[1].monitoring,
+                  },
+                  {
+                    id: response.body.rules[2].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-ids'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[2].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[2].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[2].updated_at,
+                    created_at: response.body.rules[2].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[2].scheduled_task_id,
+                    ...(response.body.rules[2].last_run
+                      ? { last_run: response.body.rules[2].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[2].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[2].next_run
+                      ? { next_run: response.body.rules[2].next_run }
+                      : {}),
+                    monitoring: response.body.rules[2].monitoring,
+                  },
+                ],
+                total: 3,
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -337,15 +494,18 @@ export default ({ getService }: FtrProviderContext) => {
               supertest
                 .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ tags: ['multiple-rules-enable'] }))
+                .send(getTestRuleData({ tags: ['multiple-rules-edit-with-filter'] }))
                 .expect(200)
             )
           );
+          rules.map((rule) => {
+            objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
+          });
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
             .set('kbn-xsrf', 'foo')
-            .send({ filter: `alert.attributes.tags: "multiple-rules-enable"` })
+            .send({ filter: `alert.attributes.tags: "multiple-rules-edit-with-filter"` })
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -357,36 +517,140 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                total: 3,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-filter'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                  {
+                    id: response.body.rules[1].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-filter'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[1].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[1].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[1].updated_at,
+                    created_at: response.body.rules[1].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[1].scheduled_task_id,
+                    ...(response.body.rules[1].last_run
+                      ? { last_run: response.body.rules[1].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[1].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[1].next_run
+                      ? { next_run: response.body.rules[1].next_run }
+                      : {}),
+                    monitoring: response.body.rules[1].monitoring,
+                  },
+                  {
+                    id: response.body.rules[2].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-filter'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[2].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[2].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[2].updated_at,
+                    created_at: response.body.rules[2].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[2].scheduled_task_id,
+                    ...(response.body.rules[2].last_run
+                      ? { last_run: response.body.rules[2].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[2].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[2].next_run
+                      ? { next_run: response.body.rules[2].next_run }
+                      : {}),
+                    monitoring: response.body.rules[2].monitoring,
+                  },
+                ],
+              });
               expect(response.statusCode).to.eql(200);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -399,6 +663,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'foo')
             .send(getTestRuleData())
             .expect(200);
+          objectRemover.add('other', createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix('other')}/internal/alerting/rules/_bulk_enable`)
@@ -409,17 +674,58 @@ export default ({ getService }: FtrProviderContext) => {
           switch (scenario.id) {
             // This superuser has more privileges that we think
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add('other', createdRule.id, 'rule', 'alerting');
               await getScheduledTask(createdRule.scheduled_task_id);
               break;
             case 'no_kibana_privileges at space1':
@@ -434,7 +740,6 @@ export default ({ getService }: FtrProviderContext) => {
               });
               expect(response.statusCode).to.eql(403);
               expect(response.statusCode).to.eql(403);
-              objectRemover.add('other', createdRule.id, 'rule', 'alerting');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -446,23 +751,23 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Validation tests', () => {
       const { user, space } = SuperuserAtSpace1;
       it('should throw an error when bulk enable of rules when both ids and filter supplied in payload', async () => {
-        const { body: createdRule1 } = await supertest
+        const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData({ tags: ['foo'] }))
           .expect(200);
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
         const response = await supertestWithoutAuth
           .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
           .set('kbn-xsrf', 'foo')
-          .send({ filter: 'fake_filter', ids: [createdRule1.id] })
+          .send({ filter: 'fake_filter', ids: [createdRule.id] })
           .auth(user.username, user.password);
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
           "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
         );
-        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
       });
 
       it('should return an error if we pass more than 1000 ids', async () => {
@@ -482,11 +787,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return an error if we do not pass any arguments', async () => {
-        await supertest
+        const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData())
           .expect(200);
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
         const response = await supertestWithoutAuth
           .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -527,6 +833,72 @@ export default ({ getService }: FtrProviderContext) => {
           message: "Either 'ids' or 'filter' property in method's arguments should be provided",
           statusCode: 400,
         });
+      });
+    });
+
+    describe('Actions', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should return the actions correctly', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule1 } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              actions: [
+                {
+                  id: createdAction.id,
+                  group: 'default',
+                  params: {},
+                },
+                {
+                  id: 'system-connector-test.system-action',
+                  params: {},
+                },
+              ],
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
+          .set('kbn-xsrf', 'foo')
+          .send({ ids: [createdRule1.id] })
+          .auth(user.username, user.password);
+
+        const action = response.body.rules[0].actions[0];
+        const systemAction = response.body.rules[0].actions[1];
+        const { uuid, ...restAction } = action;
+        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+        expect([restAction, restSystemAction]).to.eql([
+          {
+            id: createdAction.id,
+            connector_type_id: 'test.noop',
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+          },
+          ,
+        ]);
       });
     });
   });

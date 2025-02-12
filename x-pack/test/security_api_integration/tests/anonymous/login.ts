@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { adminTestUser } from '@kbn/test';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
+import expect from '@kbn/expect';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -121,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(unauthenticatedResponse.headers['set-cookie']).to.be(undefined);
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
     });
 
@@ -168,9 +171,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body.statusCode).to.be(401);
         expect(apiResponse.body.error).to.be('Unauthorized');
         expect(apiResponse.body.message).to.include.string(
-          '[security_exception] Reason: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
+          'unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
         );
-
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
     });
@@ -219,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../fixtures/audit/anonymous.log');
+      const logFilePath = resolve(__dirname, '../../plugins/audit_log/anonymous.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
@@ -246,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(2);

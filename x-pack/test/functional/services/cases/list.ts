@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import deepEqual from 'react-fast-compare';
 import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import rison from '@kbn/rison';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesCommon } from './common';
 
@@ -21,8 +21,10 @@ export function CasesTableServiceProvider(
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const header = getPageObject('header');
+  const browser = getService('browser');
   const retry = getService('retry');
   const config = getService('config');
+  const toasts = getService('toasts');
 
   const assertCaseExists = (index: number, totalCases: number) => {
     if (index > totalCases - 1) {
@@ -48,7 +50,8 @@ export function CasesTableServiceProvider(
     },
 
     async deleteCase(index: number = 0) {
-      this.openRowActions(index);
+      await toasts.dismissAll();
+      await this.openRowActions(index);
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');
       await testSubjects.existOrFail('confirmModalConfirmButton', {
@@ -81,31 +84,39 @@ export function CasesTableServiceProvider(
         rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         if (rows.length > 0) {
           await this.bulkDeleteAllCases();
-          // wait for a second
-          await new Promise((r) => setTimeout(r, 1000));
-          await header.waitUntilLoadingHasFinished();
         }
       } while (rows.length > 0);
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
-      await retry.tryForTime(3000, async () => {
+      await retry.waitFor(`the cases table to have ${nrRows} cases`, async () => {
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
-        expect(rows.length).equal(nrRows);
+        return rows.length === nrRows;
       });
+
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases table', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         return await testSubjects.exists('case-details-link');
       });
       await header.waitUntilLoadingHasFinished();
     },
 
+    async waitForNthToBeListed(numberOfCases: number) {
+      await retry.try(async () => {
+        await this.refreshTable();
+        await this.validateCasesTableHasNthRows(numberOfCases);
+      });
+
+      await header.waitUntilLoadingHasFinished();
+    },
+
     async waitForCasesToBeDeleted() {
       await retry.waitFor('the cases table to be empty', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         return rows.length === 0;
       });
@@ -115,7 +126,20 @@ export function CasesTableServiceProvider(
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
     },
 
-    async getCaseFromTable(index: number) {
+    async getCaseById(caseId: string) {
+      const targetCase = await find.allByCssSelector(
+        `[data-test-subj*="cases-table-row-${caseId}"`,
+        100
+      );
+
+      if (!targetCase.length) {
+        throw new Error(`Cannot find case with id ${caseId} on table.`);
+      }
+
+      return targetCase[0];
+    },
+
+    async getCaseByIndex(index: number) {
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 
       assertCaseExists(index, rows.length);
@@ -123,24 +147,50 @@ export function CasesTableServiceProvider(
       return rows[index] ?? null;
     },
 
+    async verifyCase(caseId: string, index: number) {
+      const theCaseById = await this.getCaseById(caseId);
+      const theCaseByIndex = await this.getCaseByIndex(index);
+
+      return (await theCaseById._webElement.getId()) === (await theCaseByIndex._webElement.getId());
+    },
+
     async filterByTag(tag: string) {
       await common.clickAndValidate(
-        'options-filter-popover-button-Tags',
+        'options-filter-popover-button-tags',
         `options-filter-popover-item-${tag}`
       );
 
       await testSubjects.click(`options-filter-popover-item-${tag}`);
     },
 
-    async filterByStatus(status: CaseStatuses) {
-      await common.clickAndValidate('case-status-filter', `case-status-filter-${status}`);
+    async filterByCategory(category: string) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-category',
+        `options-filter-popover-item-${category}`
+      );
 
-      await testSubjects.click(`case-status-filter-${status}`);
+      await testSubjects.click(`options-filter-popover-item-${category}`);
     },
 
-    async filterBySeverity(severity: CaseSeverityWithAll) {
-      await common.clickAndValidate('case-severity-filter', `case-severity-filter-${severity}`);
-      await testSubjects.click(`case-severity-filter-${severity}`);
+    async filterByStatus(status: CaseStatuses) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-status',
+        `options-filter-popover-item-${status}`
+      );
+
+      await testSubjects.click(`options-filter-popover-item-${status}`);
+      // to close the popup
+      await testSubjects.click('options-filter-popover-button-status');
+    },
+
+    async filterBySeverity(severity: CaseSeverity) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-severity',
+        `options-filter-popover-item-${severity}`
+      );
+      await testSubjects.click(`options-filter-popover-item-${severity}`);
+      // to close the popup
+      await testSubjects.click('options-filter-popover-button-severity');
     },
 
     async filterByAssignee(assignee: string) {
@@ -151,12 +201,21 @@ export function CasesTableServiceProvider(
     },
 
     async filterByOwner(owner: string) {
-      await common.clickAndValidate(
-        'options-filter-popover-button-Solution',
-        `options-filter-popover-item-${owner}`
-      );
+      const isAlreadyOpen = await testSubjects.exists('options-filter-popover-panel-owner');
+
+      if (isAlreadyOpen) {
+        await testSubjects.click(`options-filter-popover-item-${owner}`);
+        await header.waitUntilLoadingHasFinished();
+        return;
+      }
+
+      await testSubjects.click('options-filter-popover-button-owner');
+      await retry.waitFor(`filterByOwner popover opened`, async () => {
+        return await testSubjects.exists('options-filter-popover-panel-owner');
+      });
 
       await testSubjects.click(`options-filter-popover-item-${owner}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async refreshTable() {
@@ -173,7 +232,10 @@ export function CasesTableServiceProvider(
 
       const row = rows[index];
       await row.click();
-      await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
+      await retry.waitFor(
+        'popover-action-exists',
+        async () => await find.existsByCssSelector('[data-test-subj*="case-action-popover-"')
+      );
     },
 
     async openAssigneesPopover() {
@@ -194,31 +256,35 @@ export function CasesTableServiceProvider(
     async changeStatus(status: CaseStatuses, index: number) {
       await this.openRowActions(index);
 
-      await testSubjects.existOrFail('cases-bulk-action-delete');
+      await retry.waitFor('status panel exists', async () => {
+        return find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
+      });
 
-      await find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
       const statusButton = await find.byCssSelector('[data-test-subj*="case-action-status-panel-"');
 
-      statusButton.click();
+      await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
       await this.openRowActions(index);
 
-      await testSubjects.existOrFail('cases-bulk-action-delete');
+      await retry.waitFor('severity panel exists', async () => {
+        return find.existsByCssSelector('[data-test-subj*="case-action-severity-panel-"');
+      });
 
-      await find.existsByCssSelector('[data-test-subj*="case-action-severity-panel-"');
       const statusButton = await find.byCssSelector(
         '[data-test-subj*="case-action-severity-panel-"'
       );
 
-      statusButton.click();
+      await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
@@ -244,7 +310,7 @@ export function CasesTableServiceProvider(
 
       for (const caseIndex of selectedCases) {
         assertCaseExists(caseIndex, rows.length);
-        rows[caseIndex].click();
+        await rows[caseIndex].click();
       }
 
       await this.openBulkActions();
@@ -267,7 +333,7 @@ export function CasesTableServiceProvider(
 
       for (const caseIndex of selectedCases) {
         assertCaseExists(caseIndex, rows.length);
-        rows[caseIndex].click();
+        await rows[caseIndex].click();
       }
 
       await this.openBulkActions();
@@ -290,6 +356,59 @@ export function CasesTableServiceProvider(
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
     },
 
+    async bulkEditAssignees(selectedCases: number[], assigneesToClick: string[]) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        await rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-assignees');
+      await testSubjects.click('cases-bulk-action-assignees');
+
+      await testSubjects.existOrFail('cases-edit-assignees-flyout');
+
+      for (const assignee of assigneesToClick) {
+        await testSubjects.existOrFail(
+          `cases-actions-assignees-edit-selectable-assignee-${assignee}`
+        );
+        await testSubjects.click(`cases-actions-assignees-edit-selectable-assignee-${assignee}`);
+      }
+
+      await testSubjects.click('cases-edit-assignees-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-assignees-flyout');
+    },
+
+    async bulkAddNewAssignees(selectedCases: number[], searchTerm: string) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        await rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-assignees');
+      await testSubjects.click('cases-bulk-action-assignees');
+
+      await testSubjects.existOrFail('cases-edit-assignees-flyout');
+
+      await testSubjects.existOrFail('cases-actions-assignees-edit-selectable-search-input');
+      const searchInput = await testSubjects.find(
+        'cases-actions-assignees-edit-selectable-search-input'
+      );
+
+      await testSubjects.existOrFail('cases-actions-assignees-edit-selectable-search-input');
+      await searchInput.type(searchTerm);
+
+      await casesCommon.selectFirstRowInAssigneesPopover();
+
+      await testSubjects.click('cases-edit-assignees-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-assignees-flyout');
+    },
+
     async selectAndChangeStatusOfAllCases(status: CaseStatuses) {
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
@@ -308,10 +427,85 @@ export function CasesTableServiceProvider(
 
     async getCaseTitle(index: number) {
       const titleElement = await (
-        await this.getCaseFromTable(index)
+        await this.getCaseByIndex(index)
       ).findByTestSubject('case-details-link');
 
       return await titleElement.getVisibleText();
+    },
+
+    async hasColumn(columnName: string) {
+      const column = await find.allByCssSelector(
+        `th.euiTableHeaderCell span[title="${columnName}"]`
+      );
+      return column.length !== 0;
+    },
+
+    async openColumnsPopover() {
+      await testSubjects.click('column-selection-popover-button');
+      await testSubjects.existOrFail('column-selection-popover-drag-drop-context');
+    },
+
+    async closeColumnsPopover() {
+      await testSubjects.click('column-selection-popover-button');
+    },
+
+    async toggleColumnInPopover(columnId: string) {
+      await this.openColumnsPopover();
+
+      await testSubjects.existOrFail(`column-selection-switch-${columnId}`);
+      await testSubjects.click(`column-selection-switch-${columnId}`);
+
+      // closes the popover
+      await browser.pressKeys(browser.keys.ESCAPE);
+    },
+
+    async clearFilters() {
+      if (await testSubjects.exists('all-cases-clear-filters-link-icon')) {
+        await testSubjects.click('all-cases-clear-filters-link-icon');
+        await header.waitUntilLoadingHasFinished();
+      }
+    },
+
+    async setAllCasesStateInLocalStorage(state: Record<string, unknown>) {
+      await browser.setLocalStorageItem('cases.cases.list.state', JSON.stringify(state));
+
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.state')) ?? '{}'
+      );
+
+      expect(deepEqual(currentState, state)).to.be(true);
+    },
+
+    async getAllCasesStateInLocalStorage() {
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.state')) ?? '{}'
+      );
+
+      return currentState;
+    },
+
+    async setFiltersConfigurationInLocalStorage(state: Array<{ key: string; isActive: boolean }>) {
+      await browser.setLocalStorageItem(
+        'cases.cases.list.tableFiltersConfig',
+        JSON.stringify(state)
+      );
+
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.tableFiltersConfig')) ?? '{}'
+      );
+
+      expect(deepEqual(currentState, state)).to.be(true);
+    },
+
+    async expectFiltersToBeActive(filters: string[]) {
+      for (const filter of filters) {
+        await testSubjects.existOrFail(`options-filter-popover-button-${filter}`);
+      }
+    },
+
+    async setStateToUrlAndNavigate(state: Record<string, unknown>) {
+      const encodedUrlParams = rison.encode(state);
+      await common.navigateToApp('cases', { search: `cases=${encodedUrlParams}` });
     },
   };
 }

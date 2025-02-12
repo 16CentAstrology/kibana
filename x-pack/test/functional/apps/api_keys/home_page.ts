@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   const testRoles: Record<string, any> = {
     viewer: {
@@ -37,6 +38,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
+  async function ensureApiKeysExist(apiKeysNames: string[]) {
+    await retry.try(async () => {
+      for (const apiKeyName of apiKeysNames) {
+        log.debug(`Checking if API key ("${apiKeyName}") exists.`);
+        await pageObjects.apiKeys.ensureApiKeyExists(apiKeyName);
+        log.debug(`API key ("${apiKeyName}") exists.`);
+      }
+    });
+  }
+
   describe('Home page', function () {
     before(async () => {
       await clearAllApiKeys(es, log);
@@ -55,7 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('Loads the app', async () => {
       await security.testUser.setRoles(['test_api_keys']);
-      log.debug('Checking for create API key call to action');
+      log.debug('Checking for Create API key call to action');
       await find.existsByLinkText('Create API key');
     });
 
@@ -80,9 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const apiKeyName = 'Happy API Key';
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
-        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API Key');
-
-        expect(await pageObjects.apiKeys.getFlyoutUsername()).to.be('test_user');
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API key');
 
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
@@ -103,11 +112,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.toggleCustomExpiration();
-        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
-        expect(await pageObjects.apiKeys.getErrorCallOutText()).to.be(
-          'Enter a valid duration or disable this option.'
-        );
-
         await pageObjects.apiKeys.setApiKeyCustomExpiration('12');
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
@@ -162,11 +166,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
 
-        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API Key');
+        await pageObjects.apiKeys.waitForSubmitButtonOnApiKeyFlyoutEnabled();
 
-        // Verify name input box are disabled
-        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
-        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API key');
+
+        // Verify name input box is not present
+        expect(await pageObjects.apiKeys.isApiKeyNamePresent()).to.be(false);
 
         // Status should be displayed
         const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
@@ -187,7 +192,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Toggle metadata switch so the code editor shows up
         await apiKeyMetadataSwitch.click();
 
-        // Check default value of metadata and set value
+        // wait for monaco editor model to be updated
+        await pageObjects.common.sleep(300);
+
+        // Check default value of restrict privileges and set value
         const restrictPrivilegesCodeEditorValue =
           await pageObjects.apiKeys.getCodeEditorValueByIndex(0);
         expect(restrictPrivilegesCodeEditorValue).to.be('{}');
@@ -213,6 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Readonly API key', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await security.role.create('read_security_role', {
           elasticsearch: {
@@ -272,9 +281,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
-        // Verify name input box are disabled
-        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
-        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+        // Verify name input box is not present
+        expect(await pageObjects.apiKeys.isApiKeyNamePresent()).to.be(false);
 
         // Status should be displayed
         const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
@@ -318,9 +326,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
-        // Verify name input box are disabled
-        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
-        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+        // Verify name input box is not present
+        expect(await pageObjects.apiKeys.isApiKeyNamePresent()).to.be(false);
 
         // Status should be displayed
         const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
@@ -359,11 +366,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
-        expect(await pageObjects.apiKeys.getFlyoutUsername()).to.be('elastic');
-
-        // Verify name input box are disabled
-        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
-        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+        // Verify name input box is not present
+        expect(await pageObjects.apiKeys.isApiKeyNamePresent()).to.be(false);
 
         // Status should be displayed
         const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
@@ -391,6 +395,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
         await pageObjects.apiKeys.setApiKeyName('api key 1');
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
+        await ensureApiKeysExist(['api key 1']);
       });
 
       it('one by one', async () => {
@@ -405,10 +410,142 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.apiKeys.setApiKeyName('api key 2');
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
 
+        // Make sure all API keys we want to delete are created and rendered.
+        await ensureApiKeysExist(['api key 1', 'api key 2']);
+
         await pageObjects.apiKeys.bulkDeleteApiKeys();
         expect(await pageObjects.apiKeys.getApiKeysFirstPromptTitle()).to.be(
           'Create your first API key'
         );
+      });
+    });
+
+    describe('querying API keys', function () {
+      before(async () => {
+        await clearAllApiKeys(es, log);
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
+
+        await es.transport.request({
+          method: 'POST',
+          path: '/_security/cross_cluster/api_key',
+          body: {
+            name: 'test_cross_cluster',
+            expiration: '1d',
+            access: {
+              search: [
+                {
+                  names: ['*'],
+                },
+              ],
+              replication: [
+                {
+                  names: ['*'],
+                },
+              ],
+            },
+          },
+        });
+
+        await es.security.createApiKey({
+          name: 'my api key',
+          expiration: '1d',
+          role_descriptors: {
+            role_1: {},
+          },
+          metadata: {
+            managed: true,
+          },
+        });
+
+        await es.security.createApiKey({
+          name: 'Alerting: Managed',
+          expiration: '1d',
+          role_descriptors: {
+            role_1: {},
+          },
+        });
+
+        await es.security.createApiKey({
+          name: 'test_api_key',
+          expiration: '1s',
+          role_descriptors: {
+            role_1: {},
+          },
+        });
+
+        await es.security.grantApiKey({
+          api_key: {
+            name: 'test_user_api_key',
+            expiration: '1d',
+          },
+          grant_type: 'password',
+          run_as: 'test_user',
+          username: 'elastic',
+          password: 'changeme',
+        });
+
+        await pageObjects.common.navigateToApp('apiKeys');
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+        await clearAllApiKeys(es, log);
+      });
+
+      it('active/expired filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickExpiryFilters('active');
+        await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
+        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
+
+        await pageObjects.apiKeys.clickExpiryFilters('expired');
+        await ensureApiKeysExist(['test_api_key']);
+        expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
+
+        // reset filter buttons
+        await pageObjects.apiKeys.clickExpiryFilters('expired');
+      });
+
+      it('api key type filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
+
+        await ensureApiKeysExist(['test_api_key']);
+
+        await pageObjects.apiKeys.clickTypeFilters('cross_cluster');
+
+        await ensureApiKeysExist(['test_cross_cluster']);
+
+        await pageObjects.apiKeys.clickTypeFilters('managed');
+
+        await ensureApiKeysExist(['my api key', 'Alerting: Managed']);
+
+        // reset filters by simulate clicking the managed filter button again
+        await pageObjects.apiKeys.clickTypeFilters('managed');
+      });
+
+      it('username filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickUserNameDropdown();
+        expect(
+          await testSubjects.exists('userProfileSelectableOption-system_indices_superuser')
+        ).to.be(true);
+        expect(await testSubjects.exists('userProfileSelectableOption-test_user')).to.be(true);
+
+        await testSubjects.click('userProfileSelectableOption-test_user');
+
+        await ensureApiKeysExist(['test_user_api_key']);
+        await testSubjects.click('userProfileSelectableOption-test_user');
+
+        await testSubjects.click('userProfileSelectableOption-system_indices_superuser');
+
+        await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
+      });
+
+      it.skip('search bar works as expected', async () => {
+        await pageObjects.apiKeys.setSearchBarValue('test_user_api_key');
+
+        await ensureApiKeysExist(['test_user_api_key']);
+
+        await pageObjects.apiKeys.setSearchBarValue('"my api key"');
+        await ensureApiKeysExist(['my api key']);
       });
     });
   });

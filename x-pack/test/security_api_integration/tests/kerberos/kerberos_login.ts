@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { expect as jestExpect } from 'expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { adminTestUser } from '@kbn/test';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
+import expect from '@kbn/expect';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
-} from '../../fixtures/kerberos/kerberos_tools';
+} from '@kbn/security-api-integration-helpers/kerberos/kerberos_tools';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -102,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
         // users will see a proper `Unauthenticated` page.
         expect(spnegoResponse.headers['content-security-policy']).to.be.a('string');
-        expect(spnegoResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(spnegoResponse.text).to.contain('error');
       });
 
       it('AJAX requests should not initiate SPNEGO', async () => {
@@ -446,6 +449,9 @@ export default function ({ getService }: FtrProviderContext) {
         sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
+        // Let's make sure that created tokens are available for search.
+        await getService('es').indices.refresh({ index: '.security-tokens' });
+
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index after
         // some period of time.
@@ -486,7 +492,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../fixtures/audit/kerberos.log');
+      const logFilePath = resolve(__dirname, '../../plugins/audit_log/kerberos.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
@@ -516,7 +522,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(2);
@@ -542,7 +548,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Authorization', `Negotiate ${Buffer.from('Hello').toString('base64')}`)
           .expect(401);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(1);

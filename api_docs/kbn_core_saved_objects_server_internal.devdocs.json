@@ -18,28 +18,16 @@
         "label": "SavedObjectsService",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerInternalPluginApi",
-            "section": "def-server.SavedObjectsService",
-            "text": "SavedObjectsService"
-          },
+          "SavedObjectsService",
           " implements ",
           "CoreService",
           "<",
           "InternalSavedObjectsServiceSetup",
           ", ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsServiceStart",
-            "text": "SavedObjectsServiceStart"
-          },
+          "InternalSavedObjectsServiceStart",
           ">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,7 +41,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -67,7 +55,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -89,7 +77,7 @@
               "InternalSavedObjectsServiceSetup",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -103,7 +91,7 @@
                 "signature": [
                   "SavedObjectsSetupDeps"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -122,16 +110,10 @@
               "({ elasticsearch, pluginsInitialized, docLinks, node, }: ",
               "SavedObjectsStartDeps",
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsServiceStart",
-                "text": "SavedObjectsServiceStart"
-              },
+              "InternalSavedObjectsServiceStart",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -145,7 +127,7 @@
                 "signature": [
                   "SavedObjectsStartDeps"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -163,7 +145,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -184,9 +166,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_create.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -200,7 +182,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_create.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -210,12 +192,12 @@
             "id": "def-server.registerBulkCreateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_create.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -234,9 +216,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_delete.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -250,7 +232,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_delete.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,12 +242,12 @@
             "id": "def-server.registerBulkDeleteRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_delete.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -284,9 +266,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_get.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,7 +282,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_get.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -310,12 +292,12 @@
             "id": "def-server.registerBulkGetRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_get.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -334,9 +316,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_resolve.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -350,7 +332,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_resolve.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -360,12 +342,12 @@
             "id": "def-server.registerBulkResolveRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_resolve.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -384,9 +366,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_update.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -400,7 +382,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_update.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -410,12 +392,12 @@
             "id": "def-server.registerBulkUpdateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_update.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -434,9 +416,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/create.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -450,7 +432,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/create.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -460,12 +442,12 @@
             "id": "def-server.registerCreateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/create.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -484,9 +466,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/delete.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -500,7 +482,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/delete.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -510,12 +492,12 @@
             "id": "def-server.registerDeleteRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/delete.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -536,7 +518,7 @@
           "InternalSavedObjectRouter",
           ", { kibanaIndex, kibanaVersion }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/deprecations/delete_unknown_types.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -550,7 +532,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/deprecations/delete_unknown_types.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -565,7 +547,7 @@
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/deprecations/delete_unknown_types.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -586,7 +568,7 @@
           "InternalSavedObjectRouter",
           ", { config, coreUsageData }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/export.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/export.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -600,7 +582,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/export.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/export.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -615,7 +597,7 @@
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/export.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/export.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -634,9 +616,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/find.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -650,7 +632,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/find.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -660,12 +642,12 @@
             "id": "def-server.registerFindRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/find.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -684,9 +666,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/get.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -700,7 +682,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/get.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -710,12 +692,12 @@
             "id": "def-server.registerGetRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/get.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -736,7 +718,7 @@
           "InternalSavedObjectRouter",
           ", { config, coreUsageData }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/import.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/import.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -750,7 +732,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/import.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/import.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -765,7 +747,7 @@
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/import.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/import.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -784,19 +766,23 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { kibanaVersion, coreUsageData, logger, }: { kibanaVersion: string; coreUsageData: ",
+          ", { kibanaVersion, coreUsageData, logger, access, legacyDeprecationInfo, }: { kibanaVersion: string; coreUsageData: ",
           "InternalCoreUsageDataSetup",
           "; logger: ",
           {
             "pluginId": "@kbn/logging",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
+            "section": "def-common.Logger",
             "text": "Logger"
           },
+          "; access: ",
+          "RouteAccess",
+          "; legacyDeprecationInfo: ",
+          "RouteDeprecationInfo",
           "; }) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -810,7 +796,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -820,9 +806,9 @@
             "id": "def-server.registerLegacyExportRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    kibanaVersion,\n    coreUsageData,\n    logger,\n  }",
+            "label": "{\n    kibanaVersion,\n    coreUsageData,\n    logger,\n    access,\n    legacyDeprecationInfo,\n  }",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -833,7 +819,7 @@
                 "tags": [],
                 "label": "kibanaVersion",
                 "description": [],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -847,7 +833,7 @@
                 "signature": [
                   "InternalCoreUsageDataSetup"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -861,13 +847,41 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.Logger",
+                    "section": "def-common.Logger",
                     "text": "Logger"
                   }
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.registerLegacyExportRoute.$2.access",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "access",
+                "description": [],
+                "signature": [
+                  "\"internal\" | \"public\""
+                ],
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.registerLegacyExportRoute.$2.legacyDeprecationInfo",
+                "type": "Object",
+                "tags": [],
+                "label": "legacyDeprecationInfo",
+                "description": [],
+                "signature": [
+                  "RouteDeprecationInfo"
+                ],
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -887,19 +901,23 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { maxImportPayloadBytes, coreUsageData, logger, }: { maxImportPayloadBytes: number; coreUsageData: ",
+          ", { maxImportPayloadBytes, coreUsageData, logger, access, legacyDeprecationInfo, }: { maxImportPayloadBytes: number; coreUsageData: ",
           "InternalCoreUsageDataSetup",
           "; logger: ",
           {
             "pluginId": "@kbn/logging",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
+            "section": "def-common.Logger",
             "text": "Logger"
           },
+          "; access: ",
+          "RouteAccess",
+          "; legacyDeprecationInfo: ",
+          "RouteDeprecationInfo",
           "; }) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -913,7 +931,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -923,9 +941,9 @@
             "id": "def-server.registerLegacyImportRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    maxImportPayloadBytes,\n    coreUsageData,\n    logger,\n  }",
+            "label": "{\n    maxImportPayloadBytes,\n    coreUsageData,\n    logger,\n    access,\n    legacyDeprecationInfo,\n  }",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -936,7 +954,7 @@
                 "tags": [],
                 "label": "maxImportPayloadBytes",
                 "description": [],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -950,7 +968,7 @@
                 "signature": [
                   "InternalCoreUsageDataSetup"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -964,13 +982,41 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.Logger",
+                    "section": "def-common.Logger",
                     "text": "Logger"
                   }
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.registerLegacyImportRoute.$2.access",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "access",
+                "description": [],
+                "signature": [
+                  "\"internal\" | \"public\""
+                ],
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.registerLegacyImportRoute.$2.legacyDeprecationInfo",
+                "type": "Object",
+                "tags": [],
+                "label": "legacyDeprecationInfo",
+                "description": [],
+                "signature": [
+                  "RouteDeprecationInfo"
+                ],
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -994,7 +1040,7 @@
           "IKibanaMigrator",
           ">) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/migrate.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/migrate.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1008,7 +1054,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/migrate.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/migrate.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1025,7 +1071,7 @@
               "IKibanaMigrator",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/migrate.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/migrate.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1046,7 +1092,7 @@
           "InternalSavedObjectRouter",
           ", { config, coreUsageData }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/resolve_import_errors.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve_import_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1060,7 +1106,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/resolve_import_errors.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve_import_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1075,7 +1121,7 @@
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/resolve_import_errors.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve_import_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1094,9 +1140,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/resolve.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1110,7 +1156,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/resolve.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1120,12 +1166,12 @@
             "id": "def-server.registerResolveRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/resolve.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1144,9 +1190,9 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/update.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1160,7 +1206,7 @@
             "signature": [
               "InternalSavedObjectRouter"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/update.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1170,12 +1216,12 @@
             "id": "def-server.registerUpdateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/update.ts",
+            "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1190,27 +1236,60 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.InternalSavedObjectsServiceStart",
-        "type": "Type",
+        "id": "def-server.SAVED_OBJECT_TYPES_COUNT",
+        "type": "number",
         "tags": [],
-        "label": "InternalSavedObjectsServiceStart",
+        "label": "SAVED_OBJECT_TYPES_COUNT",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsServiceStart",
-            "text": "SavedObjectsServiceStart"
-          }
+          "128"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+        "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.MIGRATION_CLIENT_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "MIGRATION_CLIENT_OPTIONS",
+        "description": [
+          "\nDefines settings for the elasticsearch-js client used for the SO migrations"
+        ],
+        "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-server.MIGRATION_CLIENT_OPTIONS.maxRetries",
+            "type": "number",
+            "tags": [],
+            "label": "maxRetries",
+            "description": [],
+            "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-server.MIGRATION_CLIENT_OPTIONS.requestTimeout",
+            "type": "number",
+            "tags": [],
+            "label": "requestTimeout",
+            "description": [],
+            "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],

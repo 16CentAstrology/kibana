@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
 import type { CustomHelpers } from 'joi';
+import { SCOUT_REPORTER_ENABLED, ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
@@ -89,6 +91,10 @@ export const schema = Joi.object()
     rootTags: Joi.array().items(Joi.string()),
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
+    serverless: Joi.boolean().default(false),
+    testConfigCategory: Joi.string()
+      .valid(...Object.values(ScoutTestRunConfigCategory))
+      .default(ScoutTestRunConfigCategory.UNKNOWN),
 
     suiteFiles: Joi.object()
       .keys({
@@ -176,6 +182,12 @@ export const schema = Joi.object()
       })
       .default(),
 
+    scoutReporter: Joi.object()
+      .keys({
+        enabled: Joi.boolean().default(SCOUT_REPORTER_ENABLED),
+      })
+      .default(),
+
     users: Joi.object().pattern(
       ID_PATTERN,
       Joi.object()
@@ -192,6 +204,7 @@ export const schema = Joi.object()
         elasticsearch: urlPartsSchema({
           requiredKeys: ['port'],
         }),
+        fleetserver: urlPartsSchema(),
       })
       .default(),
 
@@ -199,7 +212,7 @@ export const schema = Joi.object()
       .keys({
         license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array().items(Joi.string()),
+        serverArgs: Joi.array().items(Joi.string()).default([]),
         esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
@@ -208,6 +221,14 @@ export const schema = Joi.object()
             scheme: /https?/,
           }),
         }),
+        files: Joi.array().items(Joi.string()),
+      })
+      .default(),
+
+    esServerlessOptions: Joi.object()
+      .keys({
+        host: Joi.string().ip(),
+        resources: Joi.array().items(Joi.string()).default([]),
       })
       .default(),
 

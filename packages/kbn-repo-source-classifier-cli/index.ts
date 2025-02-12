@@ -1,44 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
 import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
 import { ImportResolver } from '@kbn/import-resolver';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { run } from '@kbn/dev-cli-runner';
-import { createFlagError } from '@kbn/dev-cli-errors';
 
 import { TypeTree } from './src/type_tree';
 
 run(
-  async ({ flags }) => {
+  async ({ flagsReader }) => {
     const resolver = ImportResolver.create(REPO_ROOT);
     const classifier = new RepoSourceClassifier(resolver);
 
-    const include = flags._.length ? flags._ : [process.cwd()];
-    let exclude;
-    if (flags.exclude) {
-      if (Array.isArray(flags.exclude)) {
-        exclude = flags.exclude;
-      } else if (typeof flags.exclude === 'string') {
-        exclude = [flags.exclude];
-      } else {
-        throw createFlagError('expected --exclude value to be a string');
-      }
-    }
+    const include = flagsReader.getPositionals().length
+      ? flagsReader.getPositionals().map((p) => Path.resolve(p))
+      : [process.cwd()];
 
-    const typeFlags = String(flags.types)
+    const exclude = (flagsReader.arrayOfStrings('exclude') ?? []).map((p) => Path.resolve(p));
+
+    const typeFlags = String(flagsReader.string('types'))
       .split(',')
       .map((f) => f.trim())
       .filter(Boolean);
-
     const includeTypes: string[] = [];
     const excludeTypes: string[] = [];
     for (const type of typeFlags) {
@@ -60,12 +53,12 @@ run(
       tree.add(type, Path.relative(cwd, abs));
     }
 
-    if (!!flags.flat) {
+    if (flagsReader.boolean('flat')) {
       for (const file of tree.toList()) {
         process.stdout.write(`${file}\n`);
       }
     } else {
-      process.stdout.write(tree.print({ expand: !!flags.expand }));
+      process.stdout.write(tree.print({ expand: flagsReader.boolean('expand') }));
     }
   },
   {

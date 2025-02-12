@@ -6,23 +6,28 @@
  */
 
 import {
-  CasePostRequest,
-  CaseResponse,
-  CasesFindResponse,
-  CommentResponse,
-  ConnectorTypes,
-  CommentRequestUserType,
-  CommentRequestAlertType,
-  CommentType,
+  Case,
+  AttachmentType,
   CaseStatuses,
-  CommentRequest,
-  CommentRequestActionsType,
   CaseSeverity,
   ExternalReferenceStorageType,
-  CommentRequestExternalReferenceSOType,
-  CommentRequestExternalReferenceNoSOType,
-  CommentRequestPersistableStateType,
-} from '@kbn/cases-plugin/common/api';
+  FileAttachmentMetadata,
+  AlertAttachmentPayload,
+  UserCommentAttachmentPayload,
+  ActionsAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
+  ExternalReferenceSOAttachmentPayload,
+  PersistableStateAttachmentPayload,
+  Attachment,
+} from '@kbn/cases-plugin/common/types/domain';
+import type {
+  CasePostRequest,
+  PostFileAttachmentRequest,
+} from '@kbn/cases-plugin/common/types/api';
+import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**
@@ -56,29 +61,34 @@ export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequ
   ...req,
 });
 
-export const postCommentUserReq: CommentRequestUserType = {
+export const postCommentUserReq: UserCommentAttachmentPayload = {
   comment: 'This is a cool comment',
-  type: CommentType.user,
+  type: AttachmentType.user,
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentAlertReq: CommentRequestAlertType = {
+export const postFileReq: PostFileAttachmentRequest = {
+  file: 'This is a file, a buffer will be created from this string.',
+  filename: 'foobar.txt',
+};
+
+export const postCommentAlertReq: AlertAttachmentPayload = {
   alertId: 'test-id',
   index: 'test-index',
   rule: { id: 'test-rule-id', name: 'test-index-id' },
-  type: CommentType.alert,
+  type: AttachmentType.alert,
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentAlertMultipleIdsReq: CommentRequestAlertType = {
+export const postCommentAlertMultipleIdsReq: AlertAttachmentPayload = {
   alertId: ['test-id-1', 'test-id-2'],
   index: ['test-index', 'test-index-2'],
   rule: { id: 'test-rule-id', name: 'test-index-id' },
-  type: CommentType.alert,
+  type: AttachmentType.alert,
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentActionsReq: CommentRequestActionsType = {
+export const postCommentActionsReq: ActionsAttachmentPayload = {
   comment: 'comment text',
   actions: {
     targets: [
@@ -89,11 +99,11 @@ export const postCommentActionsReq: CommentRequestActionsType = {
     ],
     type: 'isolate',
   },
-  type: CommentType.actions,
+  type: AttachmentType.actions,
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentActionsReleaseReq: CommentRequestActionsType = {
+export const postCommentActionsReleaseReq: ActionsAttachmentPayload = {
   comment: 'comment text',
   actions: {
     targets: [
@@ -104,12 +114,12 @@ export const postCommentActionsReleaseReq: CommentRequestActionsType = {
     ],
     type: 'unisolate',
   },
-  type: CommentType.actions,
+  type: AttachmentType.actions,
   owner: 'securitySolutionFixture',
 };
 
-export const postExternalReferenceESReq: CommentRequestExternalReferenceNoSOType = {
-  type: CommentType.externalReference,
+export const postExternalReferenceESReq: ExternalReferenceNoSOAttachmentPayload = {
+  type: AttachmentType.externalReference,
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
   externalReferenceId: 'my-id',
   externalReferenceAttachmentTypeId: '.test',
@@ -117,13 +127,39 @@ export const postExternalReferenceESReq: CommentRequestExternalReferenceNoSOType
   owner: 'securitySolutionFixture',
 };
 
-export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType = {
+export const postExternalReferenceSOReq: ExternalReferenceSOAttachmentPayload = {
   ...postExternalReferenceESReq,
   externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
 };
 
-export const persistableStateAttachment: CommentRequestPersistableStateType = {
-  type: CommentType.persistableState,
+export const fileMetadata = () => ({
+  name: 'test_file',
+  extension: 'png',
+  mimeType: 'image/png',
+  created: '2023-02-27T20:26:54.345Z',
+});
+
+export const fileAttachmentMetadata: FileAttachmentMetadata = {
+  files: [fileMetadata()],
+};
+
+export const getFilesAttachmentReq = (
+  req?: Partial<ExternalReferenceSOAttachmentPayload>
+): ExternalReferenceSOAttachmentPayload => {
+  return {
+    ...postExternalReferenceSOReq,
+    externalReferenceStorage: {
+      type: ExternalReferenceStorageType.savedObject,
+      soType: FILE_SO_TYPE,
+    },
+    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceMetadata: { ...fileAttachmentMetadata },
+    ...req,
+  };
+};
+
+export const persistableStateAttachment: PersistableStateAttachmentPayload = {
+  type: AttachmentType.persistableState,
   owner: 'securitySolutionFixture',
   persistableStateAttachmentTypeId: '.test',
   persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
@@ -132,7 +168,7 @@ export const persistableStateAttachment: CommentRequestPersistableStateType = {
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
-): Partial<CaseResponse> => ({
+): Partial<Case> => ({
   ...req,
   ...(id != null ? { id } : {}),
   comments: [],
@@ -145,18 +181,29 @@ export const postCaseResp = (
   external_service: null,
   status: CaseStatuses.open,
   updated_by: null,
+  category: null,
+  customFields: [],
+  observables: [],
 });
+
+export const getCaseWithoutCommentsResp = (
+  id?: string | null,
+  req: CasePostRequest = postCaseReq
+): Partial<Case> => {
+  const { comments, ...caseWithoutComments } = postCaseResp(id, req);
+  return caseWithoutComments;
+};
 
 interface CommentRequestWithID {
   id: string;
-  comment: CommentRequest;
+  comment: AttachmentRequest;
 }
 
 export const commentsResp = ({
   comments,
 }: {
   comments: CommentRequestWithID[];
-}): Array<Partial<CommentResponse>> => {
+}): Array<Partial<Attachment>> => {
   return comments.map(({ comment, id }) => {
     const baseFields = {
       id,

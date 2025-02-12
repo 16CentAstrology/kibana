@@ -12,7 +12,7 @@ import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/state
 import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -314,13 +314,13 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for siem_packetbeat with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_packetbeat',
-      indexPattern: { name: 'ft_module_siem_packetbeat', timeField: '@timestamp' },
-      module: 'siem_packetbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_packetbeat',
+      indexPattern: { name: 'ft_module_security_packetbeat', timeField: '@timestamp' },
+      module: 'security_packetbeat',
       user: USER.ML_POWERUSER,
       requestBody: {
         prefix: 'pf12_',
-        indexPatternName: 'ft_module_siem_packetbeat',
+        indexPatternName: 'ft_module_security_packetbeat',
         startDatafeed: true,
         end: 1588688580000,
       },
@@ -499,13 +499,13 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for siem_cloudtrail with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_cloudtrail',
-      indexPattern: { name: 'ft_module_siem_cloudtrail', timeField: '@timestamp' },
-      module: 'siem_cloudtrail',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_cloudtrail',
+      indexPattern: { name: 'ft_module_security_cloudtrail', timeField: '@timestamp' },
+      module: 'security_cloudtrail',
       user: USER.ML_POWERUSER,
       requestBody: {
         prefix: 'pf20_',
-        indexPatternName: 'ft_module_siem_cloudtrail',
+        indexPatternName: 'ft_module_security_cloudtrail',
         startDatafeed: true,
         end: 1594231870000,
       },
@@ -669,7 +669,8 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 403,
         error: 'Forbidden',
-        message: 'Forbidden',
+        message:
+          'API [POST /internal/ml/modules/setup/sample_data_weblogs] is unauthorized for user, this action is granted by the Kibana privileges [ml:canCreateJob]',
       },
     },
   ];
@@ -681,9 +682,9 @@ export default ({ getService }: FtrProviderContext) => {
     rspCode: number
   ) {
     const { body, status } = await supertest
-      .post(`/api/ml/modules/setup/${module}`)
+      .post(`/internal/ml/modules/setup/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(rqBody);
     ml.api.assertResponseStatusCode(rspCode, status, body);
 
@@ -710,7 +711,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('sets up module data', function () {
         before(async () => {
           await esArchiver.loadIfNeeded(testData.sourceDataArchive);
-          await ml.testResources.createIndexPatternIfNeeded(
+          await ml.testResources.createDataViewIfNeeded(
             testData.indexPattern.name,
             testData.indexPattern.timeField
           );
@@ -730,7 +731,7 @@ export default ({ getService }: FtrProviderContext) => {
             await ml.api.deleteAnomalyDetectionJobES(job.jobId);
           }
           await ml.api.cleanMlIndices();
-          await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
+          await ml.testResources.deleteDataViewByTitle(testData.indexPattern.name);
         });
 
         it(testData.testTitleSuffix, async () => {
@@ -860,11 +861,11 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataListNegative) {
       describe('rejects request', function () {
         before(async () => {
-          if (testData.hasOwnProperty('sourceDataArchive')) {
+          if (Object.hasOwn(testData, 'sourceDataArchive')) {
             await esArchiver.loadIfNeeded(testData.sourceDataArchive!);
           }
-          if (testData.hasOwnProperty('indexPattern')) {
-            await ml.testResources.createIndexPatternIfNeeded(
+          if (Object.hasOwn(testData, 'indexPattern')) {
+            await ml.testResources.createDataViewIfNeeded(
               testData.indexPattern!.name as string,
               testData.indexPattern!.timeField as string
             );
@@ -873,8 +874,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         after(async () => {
           await ml.api.cleanMlIndices();
-          if (testData.hasOwnProperty('indexPattern')) {
-            await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern!.name);
+          if (Object.hasOwn(testData, 'indexPattern')) {
+            await ml.testResources.deleteDataViewByTitle(testData.indexPattern!.name);
           }
         });
 

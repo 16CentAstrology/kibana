@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -33,6 +34,14 @@ export default function ({ getService }: FtrProviderContext) {
       numberOfBackCards: 5,
     },
   ];
+  const fieldStatsEntries = [
+    {
+      fieldName: 'currency',
+      type: 'keyword' as FieldStatsType,
+      expectedValues: ['EUR'],
+    },
+  ];
+
   const bucketSpan = '2h';
   const memoryLimit = '8mb';
 
@@ -45,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       memoryStatus: 'ok',
       jobState: 'closed',
       datafeedState: 'stopped',
-      latestTimestamp: '2019-07-12 23:45:36',
+      latestTimestamp: '2023-07-12 23:45:36',
     };
   }
 
@@ -62,10 +71,10 @@ export default function ({ getService }: FtrProviderContext) {
       empty_bucket_count: '0',
       sparse_bucket_count: '0',
       bucket_count: '371',
-      earliest_record_timestamp: '2019-06-12 00:04:19',
-      latest_record_timestamp: '2019-07-12 23:45:36',
+      earliest_record_timestamp: '2023-06-12 00:04:19',
+      latest_record_timestamp: '2023-07-12 23:45:36',
       input_record_count: '4,675',
-      latest_bucket_timestamp: '2019-07-12 22:00:00',
+      latest_bucket_timestamp: '2023-07-12 22:00:00',
     };
   }
 
@@ -79,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
       total_partition_field_count: '3',
       bucket_allocation_failures_count: '0',
       memory_status: 'ok',
-      timestamp: '2019-07-12 20:00:00',
+      timestamp: '2023-07-12 20:00:00',
     };
   }
 
@@ -89,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -98,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     it('job creation loads the population wizard for the source data', async () => {
@@ -119,11 +128,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('job creation navigates through the population wizard and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
+      await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
-        'Jun 12, 2019 @ 00:04:19.000',
-        'Jul 12, 2019 @ 23:45:36.000'
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jul 12, 2023 @ 23:45:36.000'
       );
 
       await ml.testExecution.logTestStep('job creation displays the event rate chart');
@@ -133,8 +143,19 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation displays the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
-      await ml.testExecution.logTestStep('job creation selects the population field');
+      await ml.testExecution.logTestStep(
+        'job creation opens field stats flyout from population field input'
+      );
       await ml.jobWizardPopulation.assertPopulationFieldInputExists();
+      for (const { fieldName, type: fieldType, expectedValues } of fieldStatsEntries) {
+        await ml.jobWizardPopulation.assertFieldStatFlyoutContentFromPopulationFieldInputTrigger(
+          fieldName,
+          fieldType,
+          expectedValues
+        );
+      }
+
+      await ml.testExecution.logTestStep('job creation selects the population field');
       await ml.jobWizardPopulation.selectPopulationField(populationField);
 
       await ml.testExecution.logTestStep(
@@ -238,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobTable.assertJobRowFields(jobId, getExpectedRow(jobId, jobGroups));
 
-      await ml.jobTable.assertJobRowDetailsCounts(
+      await ml.jobExpandedDetails.assertJobRowDetailsCounts(
         jobId,
         getExpectedCounts(jobId),
         getExpectedModelSizeStats(jobId)
@@ -264,8 +285,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job cloning sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
-        'Jun 12, 2019 @ 00:04:19.000',
-        'Jul 12, 2019 @ 23:45:36.000'
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jul 12, 2023 @ 23:45:36.000'
       );
 
       await ml.testExecution.logTestStep('job cloning displays the event rate chart');
@@ -381,7 +402,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobTable.assertJobRowFields(jobIdClone, getExpectedRow(jobIdClone, jobGroupsClone));
 
-      await ml.jobTable.assertJobRowDetailsCounts(
+      await ml.jobExpandedDetails.assertJobRowDetailsCounts(
         jobIdClone,
         getExpectedCounts(jobIdClone),
         getExpectedModelSizeStats(jobIdClone)

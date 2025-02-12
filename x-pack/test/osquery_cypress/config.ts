@@ -11,7 +11,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
@@ -19,6 +19,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+
+    servers: {
+      ...kibanaCommonTestsConfig.get('servers'),
+      fleetserver: {
+        protocol: 'https',
+        hostname: 'host.docker.internal',
+        port: 8220,
+      },
+    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
@@ -35,12 +44,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--csp.warnLegacyBrowsers=false',
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]`,
         `--xpack.fleet.agents.elasticsearch.host=http://host.docker.internal:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,
+        `--xpack.fleet.packages.0.name=osquery_manager`,
+        `--xpack.fleet.packages.0.version=latest`,
       ],
     },
   };

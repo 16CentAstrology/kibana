@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { pick } from 'lodash';
-import { apm } from '../../lib/apm';
-import { Instance } from '../../lib/apm/instance';
 
+import { apm, Instance } from '@kbn/apm-synthtrace-client';
+import { pick } from 'lodash';
 describe('transactions with errors', () => {
   let instance: Instance;
   const timestamp = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -62,7 +62,6 @@ describe('transactions with errors', () => {
       .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
-    expect(error['error.grouping_name']).toEqual('test error');
     expect(error['error.grouping_key']).toMatchInlineSnapshot(`"0000000000000000000000test error"`);
   });
 });

@@ -14,30 +14,22 @@ const FULLSTORY_ORG_ID = process.env.FULLSTORY_ORG_ID;
 const FULLSTORY_API_KEY = process.env.FULLSTORY_API_KEY;
 const RUN_FULLSTORY_TESTS = Boolean(FULLSTORY_ORG_ID && FULLSTORY_API_KEY);
 
-const CHAT_URL = process.env.CHAT_URL;
-const CHAT_IDENTITY_SECRET = process.env.CHAT_IDENTITY_SECRET;
-const RUN_CHAT_TESTS = Boolean(CHAT_URL);
-
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-src/functional/config.base')
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, './fixtures/saml/saml_provider/metadata.xml');
-  const samlIdPPlugin = resolve(__dirname, './fixtures/saml/saml_provider');
+  const idpPath = resolve(__dirname, './plugins/saml_provider/metadata.xml');
+  const samlIdPPlugin = resolve(__dirname, './plugins/saml_provider');
 
   return {
-    testFiles: [
-      ...(RUN_FULLSTORY_TESTS ? [resolve(__dirname, './tests/fullstory')] : []),
-      ...(RUN_CHAT_TESTS ? [resolve(__dirname, './tests/chat')] : []),
-      ...(!RUN_CHAT_TESTS ? [resolve(__dirname, './tests/chat_disabled')] : []),
-    ],
+    testFiles: [...(RUN_FULLSTORY_TESTS ? [resolve(__dirname, './tests/fullstory')] : [])],
 
     services,
     pageObjects,
@@ -77,14 +69,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               `--xpack.cloud.full_story.org_id=${FULLSTORY_ORG_ID}`,
             ]
           : []),
-        ...(RUN_CHAT_TESTS
-          ? [
-              '--xpack.cloud.id=5b2de169-2785-441b-ae8c-186a1936b17d',
-              '--xpack.cloud.chat.enabled=true',
-              `--xpack.cloud.chat.chatURL=${CHAT_URL}`,
-              `--xpack.cloud.chatIdentitySecret=${CHAT_IDENTITY_SECRET}`,
-            ]
-          : []),
       ],
     },
     uiSettings: {
@@ -93,7 +77,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'dateFormat:tz': 'UTC',
       },
     },
-    apps: kibanaFunctionalConfig.get('apps'),
+    apps: {
+      ...kibanaFunctionalConfig.get('apps'),
+      observability: {
+        pathname: '/app/observability',
+      },
+      security: {
+        pathname: '/app/security',
+      },
+    },
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {

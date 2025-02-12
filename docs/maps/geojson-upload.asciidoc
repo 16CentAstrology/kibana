@@ -19,8 +19,8 @@ GeoJSON is the most commonly used and flexible option.
 Follow these instructions to upload a GeoJSON data file, or try the
 <<indexing-geojson-data-tutorial, end-to-end integrated example>>.
 
-. Open the main menu, click *Maps*, and then click *Add layer*.
-. Click *Uploaded GeoJSON*.
+. Go to *Maps*, and select *Add layer*.
+. Select *Uploaded GeoJSON*.
 +
 [role="screenshot"]
 image::maps/images/fu_gs_select_source_file_upload.png[]
@@ -39,6 +39,6 @@ the Elasticsearch responses are shown on the *Layer add panel* and the indexed d
 appears on the map. The geospatial data on the map
 should be identical to the locally-previewed data, but now it's indexed data from Elasticsearch.
 
-. To continue adding data to the map, click *Add layer*.
+. To continue adding data to the map, click *Add and continue*.
 . In *Layer settings*, adjust any settings or <<maps-vector-style-properties, properties>> as needed.
-. Click *Save & close*.
+. Click *Keep changes*.
